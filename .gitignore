@@ -1,0 +1,39 @@
+# ===== Secrets / env =====
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+
+# ===== Databases =====
+*.db
+*.sqlite
+*.sqlite3
+backend/.dev.db
+backend/.prod.db
+
+# ===== Uploads / user files =====
+backend/uploads/*
+!backend/uploads/.gitkeep
+uploads/*
+
+# ===== Python =====
+__pycache__/
+*.pyc
+.venv/
+venv/
+.envrc
+.pytest_cache/
+
+# ===== Node / Vite =====
+node_modules/
+dist/
+build/
+.vite/
+*.log
+
+# ===== OS =====
+.DS_Store
+Thumbs.db

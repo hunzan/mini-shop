@@ -1,0 +1,45 @@
+import { Outlet, Link, NavLink } from "react-router-dom";
+import SkipToContent from "../components/A11y/SkipToContent";
+import LiveRegion from "../components/A11y/LiveRegion";
+import { useCartStore } from "../store/cartStore";
+
+export default function Layout() {
+  const items = useCartStore((s) => s.items ?? []);
+  const count = items.reduce((sum, it) => sum + (it.qty ?? 0), 0);
+  const showAdmin = import.meta.env.VITE_SHOW_ADMIN === "1";
+
+  return (
+    <div>
+      <SkipToContent targetId="main" />
+      <LiveRegion />
+
+      <header className="site-header">
+        <div className="container row-between">
+          <Link to="/" className="brand">思融的精品店</Link>
+
+          <nav aria-label="主要導覽" className="nav">
+            <NavLink to="/products">商品</NavLink>
+            <NavLink to="/cart" aria-label={`購物車，目前 ${count} 件`}>
+              <span className="nav-cart">
+                購物車
+                {count > 0 && <span className="cart-badge">{count}</span>}
+              </span>
+            </NavLink>
+
+            {showAdmin && <NavLink to="/admin">管理</NavLink>}
+          </nav>
+        </div>
+      </header>
+
+      <main id="main" className="container">
+        <Outlet />
+      </main>
+
+      <footer className="site-footer">
+        <div className="container">
+          <small>© {new Date().getFullYear()} Julie's Boutique</small>
+        </div>
+      </footer>
+    </div>
+  );
+}

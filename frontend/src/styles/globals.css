@@ -1,0 +1,1109 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Arial, "Noto Sans TC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+a { color: inherit; }
+.container { max-width: var(--container); margin: 0 auto; padding: 16px; }
+
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.site-header { border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #fff; }
+.brand { font-weight: 700; text-decoration: none; }
+.nav a { margin-left: 12px; text-decoration: none; padding: 6px 8px; border-radius: 8px; }
+.nav a.active { outline: 2px solid #000; }
+
+.site-footer { border-top: 1px solid var(--border); margin-top: 24px; padding: 16px 0; }
+
+.btn { padding: 8px 10px; border: 1px solid var(--border); background: #fff; border-radius: 10px; cursor: pointer; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.card { border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
+.danger { color: var(--danger); font-weight: 700; }
+
+.qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.qty-input {
+  width: 72px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+:focus { outline: none; }
+:focus-visible { outline: 3px solid #000; outline-offset: 2px; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 8px;
+  padding: 8px 12px;
+  background: #000;
+  color: #fff;
+  z-index: 1000;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 8px;
+}
+
+/* modal */
+.modal-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 2000;
+}
+
+.modal{
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  width: min(900px, 92vw);   /* ✅ modal 寬度一致 */
+  padding: 12px;
+}
+
+.modal-img{
+  width: 100%;
+  height: min(70vh, 640px);  /* ✅ 統一高度框 */
+  object-fit: contain;       /* ✅ 完整顯示原圖 */
+  background: #f6f6f6;       /* 視覺一致 */
+  border-radius: 12px;
+  display: block;
+}
+
+.modal-close{
+  position: absolute;
+  top: 8px;
+  right: 8px; /* 右上角 ❎ */
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+/* =========================
+   商品列表縮圖（統一版）
+   - 固定尺寸
+   - 完整縮小不裁切
+   - 任意長寬比都一致呈現
+   ========================= */
+
+.thumb-btn,
+button.thumb-btn {
+  width: 200px;   /* 👈 小圖寬度 */
+  height: 200px;  /* 👈 小圖高度 */
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: #f6f6f6;
+  padding: 6px;
+
+  overflow: hidden;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 只要在 thumb-btn 裡面的 img，全都套用縮圖規則（避免 class/結構差異） */
+.thumb-btn img {
+  width: 100% !important;
+  height: 100% !important;
+
+  object-fit: contain !important;      /* ✅ 完整呈現原圖 */
+  object-position: center !important;
+
+  display: block !important;
+}
+/* 預設：完整呈現 */
+.thumb-btn img.thumb,
+.thumb-btn img.thumb--contain {
+  object-fit: contain !important;
+}
+
+/* 智慧判斷後：極端比例 → 稍微裁切 */
+.thumb-btn img.thumb--cover {
+  object-fit: cover !important;
+}
+
+.product-title{
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1.35;
+
+  /* 桌機基準：不要太巨 */
+  font-size: 1.05rem; /* 約 16.8px */
+}
+
+/* 手機：再收一點 */
+@media (max-width: 640px){
+  .product-title{
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.muted {
+  opacity: 0.8;
+}
+.result-hero {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fbfbfb;
+  margin-bottom: 12px;
+}
+
+.result-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.result-box {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+  background: #fff;
+  margin: 12px 0;
+}
+
+.steps {
+  padding-left: 18px;
+}
+
+.cta-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+.ok {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fbfbfb;
+}
+
+.product-desc {
+  line-height: 1.6;
+}
+.product-desc p { margin: 0.6em 0; }
+.product-desc ul { padding-left: 1.2em; }
+
+.form {
+  display: grid;
+  grid-template-columns: 1fr; /* 單欄直排 */
+  gap: 16px;                  /* 欄位間距 */
+  max-width: 400px;           /* 控制寬度，避免太寬 */
+}
+
+.form label {
+  display: flex;
+  flex-direction: column;     /* label 與 input 垂直排列 */
+  font-weight: 600;
+}
+
+.form input {
+  padding: 8px;
+  margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.item-info {
+  display: flex;
+  flex-wrap: wrap;   /* 超過寬度時自動換行 */
+  gap: 12px;         /* 欄位間距 */
+  margin-bottom: 8px;
+}
+
+.item-info span {
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* 顏色區分 */
+.price {
+  color: #000093;    /* 藍色：單價 */
+}
+.subtotal {
+  color: #d93025;    /* 紅色：小計，最重要 */
+  font-weight: 700;  /* 加粗 */
+}
+.stock {
+  color: #3C3C3C;    /* 灰色：庫存 */
+}
+.stock-out {
+  color: #d93025;    /* 紅色：售完 */
+  font-weight: 700;
+}
+.remain {
+  color: #188038;    /* 綠色：剩餘 */
+  font-weight: 600;
+}
+:root {
+  /* Layout */
+  --container: 980px;
+
+  /* Base colors */
+  --bg: #FFF4C1;  /* 背景：淡黃色 */
+  --text: #111;
+  --border: #ddd;
+  --danger: #b00020;
+
+  /* Game-style accent (主題色) */
+  --accent: #2563eb;
+  --accent-hi: #60a5fa;
+  --accent-dark: #1d4ed8;
+  --btn-text: #fff;
+
+  /* Radius */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+
+  /* Shadows & motion */
+  --shadow-card: 0 1px 0 rgba(0,0,0,.04), 0 8px 20px rgba(0,0,0,.08);
+  --shadow-btn: 0 6px 0 rgba(0,0,0,.22), 0 12px 22px rgba(0,0,0,.18);
+  --shadow-btn-hover: 0 7px 0 rgba(0,0,0,.22), 0 16px 28px rgba(0,0,0,.22);
+  --shadow-btn-press: 0 2px 0 rgba(0,0,0,.22), 0 6px 14px rgba(0,0,0,.16);
+
+  --press-y: 4px; /* 👈 按下去的「彈性靈魂」 */
+}
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Arial, "Noto Sans TC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.container {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.site-header {
+  position: sticky;
+  top: 0;
+  background: #FFF4C1;  /* 上方標頭：淺黃色 */
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(0,0,0,.06);
+  z-index: 100;
+}
+
+.brand { font-weight: 700; }
+
+.nav a {
+  margin-left: 12px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.nav a.active {
+  outline: 2px solid #000;
+}
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 24px;
+  padding: 16px 0;
+}
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  background: #FCFCFC;  /* 卡片：淺白灰 */
+  box-shadow: 0 1px 2px rgba(0,0,0,.04),
+              0 6px 16px rgba(0,0,0,.06);
+}
+.btn {
+  appearance: none;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+
+  background: linear-gradient(180deg, var(--accent-hi), var(--accent));
+  color: var(--btn-text);
+  font-weight: 800;
+  letter-spacing: .2px;
+
+  box-shadow: var(--shadow-btn);
+  cursor: pointer;
+
+  transform: translateY(0);
+  transition:
+    transform .08s ease,
+    box-shadow .18s ease,
+    filter .18s ease;
+}
+
+.btn:hover {
+  box-shadow: var(--shadow-btn-hover);
+  filter: saturate(1.05);
+}
+
+.btn:active {
+  transform: translateY(var(--press-y));
+  box-shadow: var(--shadow-btn-press);
+  filter: saturate(.95);
+}
+
+.btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 次要按鈕 */
+.btn-ghost {
+  background: #fff;
+  color: #111;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 0 rgba(0,0,0,.10), 0 10px 18px rgba(0,0,0,.10);
+}
+
+.btn-danger {
+  --accent: #dc2626;
+  --accent-hi: #f87171;
+}
+.qty {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.qty-input {
+  width: 72px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.list-btn {
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  box-shadow: 0 4px 0 rgba(0,0,0,.10);
+  cursor: pointer;
+}
+
+.list-btn:active {
+  transform: translateY(3px);
+}
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: var(--radius-lg);
+  }
+}
+:focus { outline: none; }
+
+:focus-visible {
+  outline: 3px solid #000;
+  outline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 8px;
+  padding: 8px 12px;
+  background: #000;
+  color: #fff;
+  border-radius: 8px;
+}
+
+.skip-link:focus {
+  top: 8px;
+}
+/* =========================
+   Header 導覽按鈕（nav-btn）
+   - 與遊戲按鈕風格一致但不彈
+   - 穩定、清楚、可辨識 active
+   ========================= */
+
+.nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  padding: 8px 12px;
+  border-radius: 12px;
+
+  background: #f3f4f6;          /* 淺灰底，與白底區分 */
+  color: #111;
+  font-weight: 600;
+
+  text-decoration: none;
+  border: 1px solid transparent;
+
+  transition: background .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.nav a:hover {
+  background: #e5e7eb;
+}
+
+.nav a.active {
+  background: #dbeafe;          /* 淺藍選中態 */
+  border-color: #93c5fd;
+  box-shadow: inset 0 0 0 1px #93c5fd;
+}
+
+/* 鍵盤導覽可及性 */
+.nav a:focus-visible {
+  outline: 3px solid #000;
+  outline-offset: 2px;
+}
+
+/* 手機：導覽按鈕變大一點好按 */
+@media (max-width: 720px) {
+  .nav a {
+    padding: 10px 14px;
+    border-radius: 14px;
+  }
+}
+/* =========================
+   管理頁專用主題（橘黃色系）
+   ========================= */
+
+.admin-scope {
+  /* 主題色覆蓋（只在管理頁） */
+  --accent: #f59e0b;      /* 橘黃 */
+  --accent-hi: #fde68a;   /* 淡黃高光 */
+  --accent-dark: #d97706;
+
+  --btn-text: #3b2f00;    /* 深色字，比白字更穩 */
+}
+
+/* 管理頁標題微強調 */
+.admin-scope h1,
+.admin-scope h2 {
+  color: #92400e;
+}
+
+/* 管理頁 card 稍微暖一點 */
+.admin-scope .card {
+  background: #fffaf0;
+}
+/* =========================
+   購物車遊戲 UI 徽章
+   ========================= */
+
+.nav-cart {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 徽章本體 */
+.cart-badge {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  color: #fff;
+  background: radial-gradient(circle at top, #4ade80, #16a34a);
+  border-radius: 999px;
+
+  /* 遊戲感立體 */
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.25),
+    0 6px 12px rgba(0,0,0,.25);
+
+  transform: translateY(-1px);
+}
+
+/* hover 時小跳一下（不會太吵） */
+.nav a:hover .cart-badge {
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* active 時沉下去 */
+.nav a:active .cart-badge {
+  transform: translateY(0);
+  box-shadow:
+    0 1px 0 rgba(0,0,0,.25),
+    0 3px 6px rgba(0,0,0,.25);
+}
+
+/* 手機稍微放大 */
+@media (max-width: 720px) {
+  .cart-badge {
+    min-width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+}
+
+/* =========================
+   管理頁（Admin）手機版優化
+   - 單欄
+   - 按鈕好按（全寬）
+   - 區塊間距清楚
+   ========================= */
+
+.admin-scope .admin-grid{
+  /* 桌機維持原本 grid */
+  gap: 16px;
+}
+
+@media (max-width: 720px){
+  /* 1) 兩欄改單欄 */
+  .admin-scope .admin-grid{
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  /* 2) 兩個 section 變成「卡片感」更清楚 */
+  .admin-scope .admin-grid > section{
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 18px);
+    padding: 14px;
+    background: #fff;
+    box-shadow: var(--shadow-card, 0 1px 0 rgba(0,0,0,.04), 0 8px 20px rgba(0,0,0,.08));
+  }
+
+  /* 3) 狀態按鈕群：改成直排（不再擠成一坨） */
+  .admin-scope .admin-grid button.btn{
+    width: 100%;
+  }
+
+  /* 4) 列表按鈕更好按 */
+  .admin-scope .admin-grid .list-btn{
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  /* 5) 文字段落換行更自然，避免一行爆出去 */
+  .admin-scope .admin-grid p,
+  .admin-scope .admin-grid li{
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* 6) 明細清單：行距更舒服 */
+  .admin-scope .admin-grid ul{
+    padding-left: 18px;
+    margin: 10px 0 0;
+  }
+  .admin-scope .admin-grid li{
+    margin: 8px 0;
+  }
+
+  /* 7) 分隔線不要太突兀 */
+  .admin-scope .admin-grid hr{
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 12px 0;
+  }
+}
+/* =========================
+   管理頁：次操作按鈕（避免誤觸）
+   ========================= */
+
+.admin-scope .btn-secondary {
+  appearance: none;
+  border-radius: var(--radius-md, 14px);
+  padding: 12px 14px;
+
+  background: linear-gradient(180deg, #eef2ff, #e0e7ff); /* 灰藍 */
+  color: #1e3a8a;
+  font-weight: 700;
+
+  border: 1px solid #c7d2fe;
+
+  box-shadow:
+    0 4px 0 rgba(0,0,0,.18),
+    0 10px 18px rgba(0,0,0,.14);
+
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .18s ease;
+}
+
+.admin-scope .btn-secondary:hover {
+  filter: saturate(1.05);
+}
+
+.admin-scope .btn-secondary:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.18),
+    0 6px 12px rgba(0,0,0,.14);
+}
+/* =========================
+   危險按鈕（刪除）— 與其他按鈕同尺寸同手感
+   ========================= */
+
+.admin-scope .btn-danger {
+  appearance: none;
+
+  /* ✅ 與 .btn / .btn-secondary 完全一致 */
+  padding: 12px 14px;
+  border-radius: var(--radius-md, 14px);
+  font-weight: 700;
+  font-size: inherit;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  /* 🎨 柔紅色系（你選的方向，保留） */
+  background: linear-gradient(180deg, #fee2e2, #fecaca);
+  color: #7f1d1d;
+  border: 1px solid #fca5a5;
+
+  /* ✅ 同一組立體感 */
+  box-shadow:
+    0 4px 0 rgba(0,0,0,.18),
+    0 10px 18px rgba(0,0,0,.14);
+
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+.admin-scope .btn-danger:hover {
+  filter: saturate(1.05);
+}
+
+.admin-scope .btn-danger:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.18),
+    0 6px 12px rgba(0,0,0,.14);
+}
+
+/* 上架中：更明確、更穩 */
+.admin-scope .btn-secondary.is-on {
+  background: linear-gradient(180deg, #dbeafe, #bfdbfe);
+  border-color: #93c5fd;
+  color: #1e3a8a;
+}
+
+/* 下架中：偏灰、提醒「目前不可見」 */
+.admin-scope .btn-secondary.is-off {
+  background: linear-gradient(180deg, #f3f4f6, #e5e7eb);
+  border-color: #d1d5db;
+  color: #374151;
+  opacity: .92;
+}
+/* =========================
+   成功 / 儲存 按鈕（淺綠）
+   ========================= */
+.admin-scope .btn-success {
+  appearance: none;
+  padding: 12px 14px;
+  border-radius: var(--radius-md, 14px);
+  font-weight: 700;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(180deg, #dcfce7, #bbf7d0);
+  color: #14532d;
+  border: 1px solid #86efac;
+
+  box-shadow:
+    0 4px 0 rgba(0,0,0,.18),
+    0 10px 18px rgba(0,0,0,.14);
+
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .18s ease;
+}
+
+.admin-scope .btn-success:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.18),
+    0 6px 12px rgba(0,0,0,.14);
+}
+
+.admin-scope .btn-success:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================
+   清空 / 重置 按鈕（淺灰）
+   ========================= */
+.admin-scope .btn-muted {
+  appearance: none;
+  padding: 12px 14px;
+  border-radius: var(--radius-md, 14px);
+  font-weight: 600;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(180deg, #f3f4f6, #e5e7eb);
+  color: #374151;
+  border: 1px solid #d1d5db;
+
+  box-shadow:
+    0 3px 0 rgba(0,0,0,.14),
+    0 8px 14px rgba(0,0,0,.12);
+
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .18s ease;
+}
+
+.admin-scope .btn-muted:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.14),
+    0 5px 10px rgba(0,0,0,.12);
+}
+/* =========================
+   庫存資訊列（RWD 友善）
+   ========================= */
+/* 預設：直列（手機友善） */
+.stock-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;                 /* 稍微放寬，呼吸感好一點 */
+  font-size: inherit;       /* ✅ 回到父層字級（正常大小） */
+  line-height: 1.5;         /* 跟 body 一致 */
+}
+
+/* 各角色語意 */
+.stock-info .stock {
+  color: #374151; /* 中性灰 */
+  font-weight: 600;
+}
+
+.stock-info .picked {
+  color: #2563eb; /* 藍：使用中 */
+  font-weight: 600;
+}
+
+.stock-info .remain {
+  color: #15803d; /* 綠：重點 */
+  font-weight: 700;
+}
+
+.stock-info .stock-out {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+
+@media (min-width: 640px) {
+  .stock-info {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px 16px;          /* 桌機左右拉開一點 */
+    align-items: baseline;
+  }
+}
+/* =========================
+   商品列表：手機版排版修正（按鈕不要卡右邊）
+   ========================= */
+
+/* 1) 商品卡片內常見的操作列（你已有 .cta-row）在手機變直排、按鈕全寬 */
+@media (max-width: 720px){
+  .cta-row{
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .cta-row .btn,
+  .cta-row button.btn{
+    width: 100%;
+  }
+}
+
+/* 2) 若商品卡片用了「左右分欄」(常見是 row-between)，手機直接改成直排 */
+@media (max-width: 720px){
+  .card .row-between{
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+/* =========================
+   商品細節頁：資訊區塊
+   ========================= */
+.product-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 價格在細節頁稍微大一點 */
+.product-meta .price {
+  font-size: 1.125rem; /* = 18px（以 16px root 為基準） */
+  font-weight: 600;
+  margin: 0;
+}
+
+/* 手機：庫存資訊直列 */
+.product-meta .stock-info {
+  gap: 4px;
+}
+
+  /* 桌機基準 */
+  font-size: 1.4rem;   /* 約 22px，舒服不搶戲 */
+}
+
+/* 🖥️ 大螢幕（可選） */
+@media (min-width: 900px){
+  h1.product-title{
+    font-size: 1.55rem;
+  }
+}
+/* 桌機：庫存資訊橫排 */
+@media (min-width: 640px) {
+  .product-meta .stock-info {
+    flex-direction: row;
+    gap: 12px 16px;
+  }
+}
+
+/* ProductCard：標題列 */
+.pc-title-row{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  align-items: baseline;
+}
+
+/* 商品名：比正文稍突出，但不巨大 */
+.pc-title{
+  font-weight: 700;
+  font-size: 1.02rem;   /* 約 16.3px */
+  line-height: 1.35;
+}
+/* 商品細節頁：商品名稱（h1） */
+h1.product-title{
+  margin: 0 0 8px 0;
+  font-weight: 700;
+  line-height: 1.3;
+
+/* 價格：次要一些 */
+.pc-price{
+  font-size: 0.98rem;   /* 約 15.7px */
+  opacity: 0.85;
+  white-space: nowrap;  /* 避免（xx 元）被拆開 */
+}
+
+/* 📱 手機：強制分行更好讀 */
+@media (max-width: 640px){
+  .pc-title-row{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  .pc-price{
+    white-space: normal;
+  }
+}
+  /* 桌機基準 */
+  font-size: 1.4rem;   /* 約 22px */
+}
+
+/* 📱 手機：再收斂一點 */
+@media (max-width: 640px){
+  h1.product-title{
+    font-size: 1.2rem;   /* 約 19px */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* =========================
+   商品列表：圖在左（桌機）/ 圖在上（手機）
+   ========================= */
+
+.pl-row{
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+/* 文字區撐滿 */
+.pl-text{
+  flex: 1;
+  min-width: 0;
+}
+
+/* 📱 手機：圖片在上方 */
+@media (max-width: 640px){
+  .pl-row{
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* 手機縮圖置中或置左都可；我先給置中更不擠 */
+  .thumb-btn,
+  button.thumb-btn{
+    width: 160px;
+    height: 160px;
+    align-self: center;
+  }
+}
+/* Home hero：手機預設直排（圖上文下） */
+.home-hero{
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.home-hero__img{
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  display: block;
+}
+
+.home-hero__content{
+  max-width: 520px;
+}
+
+/* 桌機：左右排（左圖右文） */
+@media (min-width: 768px){
+  .home-hero{
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 32px;
+  }
+
+  .home-hero__img{
+    max-width: 420px;
+    flex: 0 0 420px;
+  }
+
+  .home-hero__content{
+    max-width: 520px;
+  }
+}
+.home-hero h1{
+  font-size: 1.6rem;   /* 原本通常是 2rem～2.2rem */
+  line-height: 1.3;
+  margin: 0 0 .5em;
+}
+/* =========================
+   購物車頁 h1
+   ========================= */
+.cart-title{
+  margin: 0 0 12px 0;
+  font-weight: 700;
+  line-height: 1.25;
+
+  /* 桌機 */
+  font-size: 1.5rem;   /* 約 24px */
+}
+
+/* 📱 手機：收斂一點 */
+@media (max-width: 640px){
+  .cart-title{
+    font-size: 1.25rem; /* 約 20px */
+  }
+}
+/* =========================
+   結帳頁 h1
+   ========================= */
+.checkout-title{
+  margin: 0 0 16px 0;
+  font-weight: 700;
+  line-height: 1.2;
+
+  /* 桌機：稍微比購物車再正式一點 */
+  font-size: 1.6rem;   /* 約 26px */
+}
+
+/* 📱 手機：穩定、安心感 */
+@media (max-width: 640px){
+  .checkout-title{
+    font-size: 1.3rem; /* 約 21px */
+  }
+}
