@@ -27,8 +27,7 @@ class OrderCreate(BaseModel):
     # ✅郵寄/宅配：可選，沒填就用 shipping_address 補
     shipping_post_address: Optional[str] = None
 
-    # ✅超商：可選（但情境驗證會要求 cvs_* 必填）
-    cvs_brand: Optional[Literal["7-11", "全家"]] = None
+    # ✅超商取貨：只要門市資訊（品牌由 shipping_method 決定）
     cvs_store_id: Optional[str] = None
     cvs_store_name: Optional[str] = None
 

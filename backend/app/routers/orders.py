@@ -379,18 +379,31 @@ def mark_shipped(
     lines.append(f"訂單金額：{o.total_amount} 元")
     lines.append("")
 
-    # 物流資訊
-    lines.append("【配送資訊】")
-    lines.append(f"方式：{o.shipping_method}")
+    # 物流資訊（用 order 內已存欄位）
+    buyer_lines.append("【配送方式】")
+    buyer_lines.append(f"方式：{_ship_label(order.shipping_method)}")
 
-    if o.shipping_method in ("cvs_711", "cvs_family"):
-        brand = o.cvs_brand or ""
-        store_name = o.cvs_store_name or ""
-        store_id = o.cvs_store_id or ""
-        lines.append(f"門市：{brand} {store_name}（{store_id}）".strip())
+    sm = _s(order.shipping_method)
+
+    if sm in ("post", "courier"):
+        addr = _s(order.shipping_post_address) or _s(order.shipping_address)
+        buyer_lines.append(f"地址：{addr}" if addr else "地址：（未提供）")
+
+    elif sm in ("cvs_711", "cvs_family"):
+        store_name = _s(order.cvs_store_name)
+        store_id = _s(order.cvs_store_id)
+
+        if store_name or store_id:
+            # 7-11 / 全家由 shipping_method 決定，不再需要 cvs_brand
+            buyer_lines.append(f"門市：{store_name}{f'（{store_id}）' if store_id else ''}".strip())
+        else:
+            buyer_lines.append("門市：（未提供）")
+
     else:
-        addr = o.shipping_post_address or o.shipping_address or ""
-        lines.append(f"地址：{addr}")
+        # 保底：避免未來新增 shipping_method 時信件空白
+        addr = _s(order.shipping_post_address) or _s(order.shipping_address)
+        if addr:
+            buyer_lines.append(f"地址：{addr}")
 
     if (payload.tracking_no or "").strip():
         lines.append(f"物流單號：{payload.tracking_no.strip()}")
