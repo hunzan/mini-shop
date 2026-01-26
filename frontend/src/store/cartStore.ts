@@ -4,7 +4,9 @@ export type CartItem = {
   productId: number;
   name: string;
   price: number;
-  stock_qty: number;
+
+  qty: number;           // ✅ 你全站都用這個
+  stock_qty?: number;    // ✅ 可選：用來做庫存上限提示
 };
 
 type CartState = {

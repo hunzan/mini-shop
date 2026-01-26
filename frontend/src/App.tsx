@@ -7,7 +7,6 @@ import ProductCard from "./components/ProductCard";
 
 type OrderCreated = { order_id: number; total_amount: number };
 type ShippingMethod = "post" | "cvs_711" | "cvs_family" | "courier";
-type CvsBrand = "7-11" | "family";
 type Category = { id: number; name: string; sort_order: number };
 type ActiveCategory = "all" | "uncat" | number;
 
@@ -109,7 +108,6 @@ function Shop({ onGoAdmin }: { onGoAdmin: () => void }) {
     recipientName: null as HTMLInputElement | null,
     recipientPhone: null as HTMLInputElement | null,
     postAddress: null as HTMLTextAreaElement | null,
-    cvsBrand: null as HTMLSelectElement | null,
     cvsStoreId: null as HTMLInputElement | null,
     cvsStoreName: null as HTMLInputElement | null,
   });
@@ -117,7 +115,6 @@ function Shop({ onGoAdmin }: { onGoAdmin: () => void }) {
   // ====== 其他 state ======
   const [postAddress, setPostAddress] = useState("");
 
-  const [cvsBrand, setCvsBrand] = useState<CvsBrand>("7-11");
   const [cvsStoreId, setCvsStoreId] = useState("");
   const [cvsStoreName, setCvsStoreName] = useState("");
 
@@ -324,25 +321,15 @@ function Shop({ onGoAdmin }: { onGoAdmin: () => void }) {
 
       setPlacing(true);
       try {
-        // ✅ 1) UI 的 shippingMethod: post / cvs_711 / cvs_family
-        // ✅ 2) API 只吃 post / cvs
-        const apiShippingMethod: "post" | "cvs" =
-          shippingMethod === "post" ? "post" : "cvs";
+        // ✅ UI 與 API 統一：直接送後端同名欄位
+        const apiShippingMethod = shippingMethod; // "post" | "cvs_711" | "cvs_family" | "courier"
 
-        // ✅ 把 UI 的 cvs_711 / cvs_family 轉成你後端要的 cvs_brand
-        const apiCvsBrand: CvsBrand | null =
-          shippingMethod === "cvs_711"
-            ? "7-11"
-            : shippingMethod === "cvs_family"
-            ? "family"
-            : null;
 
         const shipping_address = buildFallbackShippingAddress({
           shippingMethod, // 注意：這裡仍可用 UI 版本讓字串更清楚
           recipientName: recipientName.trim(),
           recipientPhone: recipientPhone.trim(),
           postAddress: postAddress.trim(),
-          cvsBrand: apiCvsBrand ?? "7-11",
           cvsStoreId: cvsStoreId.trim(),
           cvsStoreName: cvsStoreName.trim(),
         });
@@ -351,8 +338,8 @@ function Shop({ onGoAdmin }: { onGoAdmin: () => void }) {
           customer_name: customerName.trim(),
           customer_email: customerEmail.trim(),
 
-          // ✅ 後端只吃 cvs/post
-          shipping_method: apiShippingMethod,
+          // ✅ 直接送後端支援的值：post / cvs_711 / cvs_family / courier
+          shipping_method: shippingMethod,
           shipping_address,
 
           recipient_name: recipientName.trim(),
@@ -364,17 +351,20 @@ function Shop({ onGoAdmin }: { onGoAdmin: () => void }) {
           })),
         };
 
-        // ✅ 依 apiShippingMethod 決定欄位
-        if (apiShippingMethod === "post") {
+        // ✅ 依 shipping_method 決定欄位（不再有 cvs_brand）
+        if (shippingMethod === "post") {
           payload.shipping_post_address = postAddress.trim();
-          payload.cvs_brand = null;
           payload.cvs_store_id = null;
           payload.cvs_store_name = null;
-        } else {
+        } else if (shippingMethod === "cvs_711" || shippingMethod === "cvs_family") {
           payload.shipping_post_address = null;
-          payload.cvs_brand = apiCvsBrand; // ✅ 7-11 / family
           payload.cvs_store_id = cvsStoreId.trim();
           payload.cvs_store_name = cvsStoreName.trim();
+        } else if (shippingMethod === "courier") {
+          // 你若有宅配地址欄位，就在這裡填；沒有就先全 null 也行（看後端驗證）
+          payload.shipping_post_address = null;
+          payload.cvs_store_id = null;
+          payload.cvs_store_name = null;
         }
 
         const res = await apiPost<OrderCreated>("/orders", payload);
@@ -401,7 +391,7 @@ function Shop({ onGoAdmin }: { onGoAdmin: () => void }) {
                 const prod = products.find((p) => p.id === productId);
                 const name = prod?.name ?? `商品 #${productId}`;
 
-                setError(`「${name}」庫存只有 ${stock_qty} 件，你選了 ${requested} 件，請把數量調整到 ${stock} 件以內。`);
+                setError(`「${name}」庫存只有 ${stock_qty} 件，你選了 ${requested} 件，請把數量調整到 ${stock_qty} 件以內。`);
                 return;
               }
 

@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { apiPost } from "./client";
 
 export type CreateOrderItem = { product_id: string; qty: number };
 export type CreateOrderPayload = {
@@ -14,5 +14,5 @@ export type CreateOrderResponse = {
 };
 
 export function createOrder(payload: CreateOrderPayload): Promise<CreateOrderResponse> {
-  return apiFetch<CreateOrderResponse>("/orders", { method: "POST", json: payload });
+  return apiPost<CreateOrderResponse>("/orders", payload);
 }

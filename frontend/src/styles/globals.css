@@ -925,10 +925,6 @@ a { color: inherit; text-decoration: none; }
   gap: 4px;
 }
 
-  /* 桌機基準 */
-  font-size: 1.4rem;   /* 約 22px，舒服不搶戲 */
-}
-
 /* 🖥️ 大螢幕（可選） */
 @media (min-width: 900px){
   h1.product-title{

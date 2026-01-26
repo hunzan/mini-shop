@@ -103,7 +103,7 @@ export default function ProductList() {
 
   const inc = (p: Product) => {
     const cur = qtyMap[p.id] ?? 1;
-    if (p.stock > 0 && cur >= p.stock) {
+    if (p.stock_qty > 0 && cur >= p.stock_qty) {
       setLimitMap((m) => ({ ...m, [p.id]: true }));
       announce("此項商品已達庫存");
       return;
@@ -131,8 +131,8 @@ export default function ProductList() {
             : "/placeholder.png";
 
           const qty = qtyMap[p.id] ?? 1;
-          const atLimit = p.stock > 0 && qty >= p.stock;
-          const soldOut = p.stock <= 0;
+          const atLimit = p.stock_qty > 0 && qty >= p.stock_qty;
+          const soldOut = p.stock_qty <= 0;
           const showLimit = !!limitMap[p.id] && atLimit;
 
           return (

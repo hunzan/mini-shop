@@ -8,7 +8,6 @@ async function parseError(res: Response): Promise<string> {
     if (contentType.includes("application/json")) {
       const data = await res.json();
       if (typeof data === "string") return data;
-      // 常見 FastAPI 格式：{ detail: "..." } 或 { detail: [...] }
       if (data?.detail) return typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
       return JSON.stringify(data);
     }
@@ -47,3 +46,26 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   if (res.status === 204) return undefined as unknown as T;
   return (await res.json()) as T;
 }
+
+export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const url = `${API_BASE}${path}`;
+
+  const res = await fetch(url, {
+    ...init,
+    headers: {
+      Accept: "application/json",
+      ...(init?.body ? { "Content-Type": "application/json" } : {}),
+      ...(init?.headers || {}),
+    },
+  });
+
+  if (!res.ok) throw new Error(await parseError(res));
+  if (res.status === 204) return undefined as unknown as T;
+
+  // 兼容：有些回傳不是 json（極少），就用 text
+  const ct = res.headers.get("content-type") || "";
+  if (!ct.includes("application/json")) return (await res.text()) as unknown as T;
+
+  return (await res.json()) as T;
+}
+

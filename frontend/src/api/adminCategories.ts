@@ -1,4 +1,4 @@
-import { adminGet, adminPost, adminPatch } from "./adminClient";
+import { adminGet, adminPost, adminPatchJson } from "./adminClient";
 
 export type AdminCategory = {
   id: number;
@@ -27,5 +27,5 @@ export function updateCategory(
     is_active: boolean;
   }>
 ) {
-  return adminPatch<AdminCategory>(`/admin/categories/${id}`, payload);
+  return adminPatchJson<AdminCategory>(`/admin/categories/${id}`, payload);
 }

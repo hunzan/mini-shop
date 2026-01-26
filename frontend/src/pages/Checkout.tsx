@@ -26,7 +26,8 @@ type EnrichedItem = {
   productId: number;
   name: string;
   price: number;
-  stock_qty: number;
+  qty: number;
+  stock_qty?: number;
   product?: Product;
 };
 
@@ -78,7 +79,7 @@ export default function Checkout() {
         const results: EnrichedItem[] = [];
         for (const it of items) {
           const p = await apiGet<Product>(`/products/${it.productId}`);
-          results.push({ ...it, product: p });
+          results.push({ ...it, product: p, stock_qty: it.stock_qty ?? 0 });
         }
         if (!mounted) return;
         setEnriched(results);
