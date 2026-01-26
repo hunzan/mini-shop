@@ -54,3 +54,7 @@ def dev_seed():
     with SessionLocal() as db:
         seed_products(db)
     return {"ok": True}
+
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
