@@ -2,12 +2,20 @@ FROM node:20-slim
 
 WORKDIR /app
 
-COPY frontend/package*.json /app/
+# 先拷依賴描述檔（快取）
+COPY frontend/package.json ./package.json
+COPY frontend/package-lock.json ./package-lock.json
+
 RUN npm ci
 
-COPY frontend /app
+# 再拷貝原始碼
+COPY frontend/ ./
+
+# build
 RUN npm run build
 
-# 用 vite preview 或 serve 都可；你已裝 serve，我用 serve
+# 靜態伺服器
 RUN npm i -g serve
-CMD ["bash","-lc","serve -s dist -l ${PORT:-3000}"]
+
+# Railway 會給 PORT；本機沒給就用 3000
+CMD ["sh", "-c", "serve -s dist -l ${PORT:-3000}"]
