@@ -789,10 +789,10 @@ export default function AdminProducts() {
                           type="button"
                           className={`btn-secondary ${p.is_active ? "is-on" : "is-off"}`}
                           aria-pressed={p.is_active}
-                          aria-label={`${p.name} ${p.is_active ? "下架" : "上架"}`} // 移到這裡
+                          aria-label={`${p.name} ${p.is_active ? "下架" : "上架"}`}
                           onClick={() => toggleActive(p)}
                         >
-                          {p.is_active ? "下架" : "上架"} {/* 這裡應該放按鈕要顯示的文字 */}
+                          {p.is_active ? "下架" : "上架"}
                         </button>
 
                           {/* 刪除：危險 */}
@@ -849,7 +849,7 @@ export default function AdminProducts() {
                     {p.image_url ? (
                       <>
                         <a href={toAbsUrl(p.image_url)} target="_blank" rel="noreferrer">
-                          開啟圖片
+                          VIEW_IMAGE_TEST
                         </a>
                         <div style={{ marginTop: 8 }}>
                           <img
