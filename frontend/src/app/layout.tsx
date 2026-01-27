@@ -7,6 +7,8 @@ export default function Layout() {
   const items = useCartStore((s) => s.items ?? []);
   const count = items.reduce((sum, it) => sum + (it.qty ?? 0), 0);
   const showAdmin = Boolean(import.meta.env.VITE_ADMIN_TOKEN);
+  console.log("admin token:", import.meta.env.VITE_ADMIN_TOKEN);
+
 
   return (
     <div>
