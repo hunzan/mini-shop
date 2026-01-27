@@ -12,6 +12,8 @@ function joinUrl(base: string, path: string) {
   return `${base}${p}`;
 }
 
+function buildHeaders() {
+  const token = import.meta.env.VITE_ADMIN_TOKEN || "";
 function adminToken() {
   return import.meta.env.VITE_ADMIN_TOKEN || "";
 }
@@ -20,13 +22,14 @@ function jsonHeaders(extra?: Record<string, string>) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
+    "X-Admin-Token": token, // ✅ 對應後端 require_admin(x_admin_token=Header)
     "X-Admin-Token": adminToken(),
     ...(extra || {}),
   };
 }
 
 function authHeaders(extra?: Record<string, string>) {
-  // 上傳用：不要指定 Content-Type，讓瀏覽器自動帶 multipart boundary
+  // 給上傳用：不強制 Content-Type，讓瀏覽器自動帶 multipart boundary
   return {
     Accept: "application/json",
     "X-Admin-Token": adminToken(),
@@ -34,12 +37,11 @@ function authHeaders(extra?: Record<string, string>) {
   };
 }
 
-async function parseError(res: Response): Promise<string> {
-  try {
-    const ct = res.headers.get("content-type") || "";
+@@ -27,7 +40,10 @@
     if (ct.includes("application/json")) {
       const data = await res.json();
       if (typeof data === "string") return data;
+      if (data?.detail) return typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
       if (data?.detail)
         return typeof data.detail === "string"
           ? data.detail
@@ -47,11 +49,13 @@ async function parseError(res: Response): Promise<string> {
       return JSON.stringify(data);
     }
     return await res.text();
-  } catch {
-    return `HTTP ${res.status}`;
+@@ -36,45 +52,94 @@
   }
 }
 
+export async function adminGet<T>(path: string): Promise<T> {
+  const url = joinUrl(API_BASE, path);
+  const res = await fetch(url, { headers: buildHeaders() });
 async function ensureOk<T>(res: Response): Promise<T> {
   if (!res.ok) throw new Error(await parseError(res));
   if (res.status === 204) return undefined as unknown as T;
@@ -61,7 +65,8 @@ async function ensureOk<T>(res: Response): Promise<T> {
   return (await res.json()) as T;
 }
 
-// ✅ 你需要的：adminGet / adminPost / adminPatchJson
+export async function adminPost<T>(path: string, body: unknown): Promise<T> {
+// -------- 基本 CRUD（你以後也可以用） --------
 
 export async function adminGet<T>(path: string): Promise<T> {
   const url = joinUrl(API_BASE, path);
@@ -69,28 +74,70 @@ export async function adminGet<T>(path: string): Promise<T> {
   return ensureOk<T>(res);
 }
 
-// 相容舊用法：adminPost(...) 一律當 JSON POST
-export async function adminPost<T>(path: string, body: unknown): Promise<T> {
+export async function adminPostJson<T>(path: string, body: unknown): Promise<T> {
   const url = joinUrl(API_BASE, path);
   const res = await fetch(url, {
     method: "POST",
+    headers: buildHeaders(),
     headers: jsonHeaders(),
     body: JSON.stringify(body),
   });
+  if (!res.ok) throw new Error(await parseError(res));
+  if (res.status === 204) return undefined as unknown as T;
+  return (await res.json()) as T;
   return ensureOk<T>(res);
 }
 
+export async function adminPut<T>(path: string, body: unknown): Promise<T> {
 export async function adminPutJson<T>(path: string, body: unknown): Promise<T> {
   const url = joinUrl(API_BASE, path);
   const res = await fetch(url, {
     method: "PUT",
+    headers: buildHeaders(),
     headers: jsonHeaders(),
     body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  if (res.status === 204) return undefined as unknown as T;
+  return (await res.json()) as T;
+  return ensureOk<T>(res);
+}
+
+export async function adminDelete<T>(path: string): Promise<T> {
+  const url = joinUrl(API_BASE, path);
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: buildHeaders(),
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  if (res.status === 204) return undefined as unknown as T;
+  return (await res.json()) as T;
+  return ensureOk<T>(res);
+}
+
+// -------- 你目前缺的：PATCH & PATCH JSON --------
+
+export async function adminPatch<T>(
+  path: string,
+  init?: RequestInit
+): Promise<T> {
+  const url = joinUrl(API_BASE, path);
+  const res = await fetch(url, {
+    method: "PATCH",
+    ...init,
+    headers: {
+      ...(init?.headers || {}),
+      ...authHeaders(), // 確保一定帶 token
+    },
   });
   return ensureOk<T>(res);
 }
 
-export async function adminPatchJson<T>(path: string, body: unknown): Promise<T> {
+export async function adminPatchJson<T>(
+  path: string,
+  body: unknown
+): Promise<T> {
   const url = joinUrl(API_BASE, path);
   const res = await fetch(url, {
     method: "PATCH",
@@ -100,34 +147,17 @@ export async function adminPatchJson<T>(path: string, body: unknown): Promise<T>
   return ensureOk<T>(res);
 }
 
-export async function adminDelete<T>(path: string): Promise<T> {
-  const url = joinUrl(API_BASE, path);
-  const res = await fetch(url, { method: "DELETE", headers: authHeaders() });
-  return ensureOk<T>(res);
-}
+// -------- 你目前缺的：上傳檔案 --------
 
-// ✅ 你之前也缺過：上傳（同時支援 File 或 FormData）
 export async function adminUploadFile<T>(
   path: string,
-  fileOrForm: File | FormData,
-  fieldName = "file"
+  formData: FormData
 ): Promise<T> {
   const url = joinUrl(API_BASE, path);
-
-  const form =
-    fileOrForm instanceof FormData
-      ? fileOrForm
-      : (() => {
-          const fd = new FormData();
-          fd.append(fieldName, fileOrForm);
-          return fd;
-        })();
-
   const res = await fetch(url, {
     method: "POST",
-    headers: authHeaders(),
-    body: form,
+    headers: authHeaders(), // 不要 Content-Type
+    body: formData,
   });
-
   return ensureOk<T>(res);
 }
