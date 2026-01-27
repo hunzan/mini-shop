@@ -26,7 +26,7 @@ function jsonHeaders(extra?: Record<string, string>) {
 }
 
 function authHeaders(extra?: Record<string, string>) {
-  // 給上傳用：不要固定 Content-Type，讓瀏覽器自動帶 multipart boundary
+  // 上傳用：不要指定 Content-Type，讓瀏覽器自動帶 multipart boundary
   return {
     Accept: "application/json",
     "X-Admin-Token": adminToken(),
@@ -61,7 +61,7 @@ async function ensureOk<T>(res: Response): Promise<T> {
   return (await res.json()) as T;
 }
 
-// -------- 基本 --------
+// ✅ 你需要的：adminGet / adminPost / adminPatchJson
 
 export async function adminGet<T>(path: string): Promise<T> {
   const url = joinUrl(API_BASE, path);
@@ -69,12 +69,8 @@ export async function adminGet<T>(path: string): Promise<T> {
   return ensureOk<T>(res);
 }
 
-// ✅ 舊介面相容：很多檔案在用 adminPost
+// 相容舊用法：adminPost(...) 一律當 JSON POST
 export async function adminPost<T>(path: string, body: unknown): Promise<T> {
-  return adminPostJson<T>(path, body);
-}
-
-export async function adminPostJson<T>(path: string, body: unknown): Promise<T> {
   const url = joinUrl(API_BASE, path);
   const res = await fetch(url, {
     method: "POST",
@@ -94,28 +90,6 @@ export async function adminPutJson<T>(path: string, body: unknown): Promise<T> {
   return ensureOk<T>(res);
 }
 
-export async function adminDelete<T>(path: string): Promise<T> {
-  const url = joinUrl(API_BASE, path);
-  const res = await fetch(url, {
-    method: "DELETE",
-    headers: authHeaders(),
-  });
-  return ensureOk<T>(res);
-}
-
-export async function adminPatch<T>(path: string, init?: RequestInit): Promise<T> {
-  const url = joinUrl(API_BASE, path);
-  const res = await fetch(url, {
-    method: "PATCH",
-    ...init,
-    headers: {
-      ...(init?.headers || {}),
-      ...authHeaders(),
-    },
-  });
-  return ensureOk<T>(res);
-}
-
 export async function adminPatchJson<T>(path: string, body: unknown): Promise<T> {
   const url = joinUrl(API_BASE, path);
   const res = await fetch(url, {
@@ -126,8 +100,13 @@ export async function adminPatchJson<T>(path: string, body: unknown): Promise<T>
   return ensureOk<T>(res);
 }
 
-// ✅ 相容：允許直接傳 File（呼叫端不用改）
-// 也允許傳 FormData（更彈性）
+export async function adminDelete<T>(path: string): Promise<T> {
+  const url = joinUrl(API_BASE, path);
+  const res = await fetch(url, { method: "DELETE", headers: authHeaders() });
+  return ensureOk<T>(res);
+}
+
+// ✅ 你之前也缺過：上傳（同時支援 File 或 FormData）
 export async function adminUploadFile<T>(
   path: string,
   fileOrForm: File | FormData,
