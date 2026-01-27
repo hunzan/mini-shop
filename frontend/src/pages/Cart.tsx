@@ -81,7 +81,7 @@ export default function Cart() {
 
   return (
     <div className="card">
-      <h1>購物車</h1>
+      <h1>🛒購物車</h1>
 
       {err ? <p className="danger">⚠️ {err}</p> : null}
       {loading ? <p>載入庫存中…</p> : null}
