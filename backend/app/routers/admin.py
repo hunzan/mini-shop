@@ -7,8 +7,6 @@ from ..models.order_item import OrderItem
 from ..models.product import Product
 from ..deps import require_admin_key
 
-_admin=Depends(require_admin_key),
-
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
 
 ALLOWED_STATUS = {"pending", "paid", "shipped", "done", "cancelled"}

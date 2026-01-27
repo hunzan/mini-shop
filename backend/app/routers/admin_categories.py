@@ -11,15 +11,13 @@ from ..schemas.admin_category import (
 )
 from ..deps import require_admin_key
 
-_admin=Depends(require_admin_key),
-
 router = APIRouter(prefix="/admin/categories", tags=["admin"])
 
 
 @router.get("", response_model=list[AdminCategoryOut])
 def admin_list_categories(
     db: Session = Depends(get_db),
-    _admin=Depends(require_admin),
+    _admin=Depends(require_admin_key),
 ):
     rows = (
         db.query(Category)
@@ -33,7 +31,7 @@ def admin_list_categories(
 def admin_create_category(
     payload: AdminCategoryCreate,
     db: Session = Depends(get_db),
-    _admin=Depends(require_admin),
+    _admin=Depends(require_admin_key),
 ):
     name = payload.name.strip()
     if not name:
@@ -59,7 +57,7 @@ def admin_update_category(
     category_id: int,
     payload: AdminCategoryUpdate,
     db: Session = Depends(get_db),
-    _admin=Depends(require_admin),
+    _admin=Depends(require_admin_key),
 ):
     row = db.query(Category).filter(Category.id == category_id).first()
     if not row:
