@@ -20,21 +20,31 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 # ✅ CORS
+def parse_origins(value: str | None) -> list[str]:
+    """
+    支援：
+    - 單一 origin：https://xxx.up.railway.app
+    - 多個 origin（逗號分隔）：https://a,https://b
+    """
+    if not value:
+        return []
+    parts = [p.strip() for p in value.split(",")]
+    return [p for p in parts if p]
+
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
 
-# 線上前端（從 ENV 讀；你 Railway 要設 FRONTEND_ORIGIN）
-if settings.frontend_origin:
-    origins.append(settings.frontend_origin)
+# 線上前端（可多個，用逗號分隔）
+origins += parse_origins(settings.frontend_origin)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,          # ✅ 加入 https://julie-shop.up.railway.app
-    allow_credentials=False,        # ✅ 你現在用 token header，不需要 cookies
+    allow_origins=origins,
+    allow_credentials=False,  # token header，不用 cookies
     allow_methods=["*"],
-    allow_headers=["*"],            # ✅ 允許 X-Admin-Token
+    allow_headers=["*"],      # 允許 X-Admin-Token / Content-Type 等
 )
 
 Base.metadata.create_all(bind=engine)
