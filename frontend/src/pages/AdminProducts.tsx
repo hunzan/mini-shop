@@ -723,16 +723,16 @@ export default function AdminProducts() {
                 </fieldset>
               )}
 
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <button
-                  type="button"
-                  className="btn-success"
-                  onClick={submitCreate}
-                  disabled={creating}
-                  開啟圖片
-                >
-                  {creating ? "送出中..." : editingId ? "儲存修改" : "送出新增"}
-                </button>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    className="btn-success"
+                    onClick={submitCreate}
+                    disabled={creating}
+                  >
+                    {creating ? "送出中..." : editingId ? "儲存修改" : "送出新增"}
+                  </button>
+                </div>
 
                 <button
                   type="button"
