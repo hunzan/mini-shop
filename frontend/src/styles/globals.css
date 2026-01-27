@@ -12,12 +12,9 @@ a { color: inherit; }
 
 .row-between { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
-.site-header { border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #fff; }
 .brand { font-weight: 700; text-decoration: none; }
 .nav a { margin-left: 12px; text-decoration: none; padding: 6px 8px; border-radius: 8px; }
 .nav a.active { outline: 2px solid #000; }
-
-.site-footer { border-top: 1px solid var(--border); margin-top: 24px; padding: 16px 0; }
 
 .btn { padding: 8px 10px; border: 1px solid var(--border); background: #fff; border-radius: 10px; cursor: pointer; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -335,10 +332,20 @@ a { color: inherit; text-decoration: none; }
 .site-header {
   position: sticky;
   top: 0;
-  background: #FFE153;  /* 上方標頭：淺黃色 */
+  background: rgba(255, 237, 151, 0.6); /* 淺黃色 + 半透明 */
   border-bottom: 1px solid var(--border);
   box-shadow: 0 1px 0 rgba(0,0,0,.06);
   z-index: 100;
+
+  /* 玻璃感效果 */
+  backdrop-filter: blur(8px);       /* 模糊背景 */
+  -webkit-backdrop-filter: blur(8px); /* Safari 支援 */
+
+  /* 文字樣式 */
+  font-size: 24px;   /* 調整字體大小 */
+  color: #6F4E37;    /* 咖啡色文字 */
+  text-align: left;  /* 左上角對齊 */
+  padding: 12px 24px;
 }
 
 .brand { font-weight: 700; }
@@ -357,7 +364,10 @@ a { color: inherit; text-decoration: none; }
   border-top: 1px solid var(--border);
   margin-top: 24px;
   padding: 16px 0;
+  text-align: center;
+  color: #6F4E37;
 }
+
 .card {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);

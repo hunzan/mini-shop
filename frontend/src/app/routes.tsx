@@ -11,6 +11,7 @@ import CheckoutResult from "../pages/CheckoutResult";
 import Admin from "../pages/Admin";
 import AdminProducts from "../pages/AdminProducts";
 import AdminOrders from "../pages/AdminOrders";
+import AdminGate from "../pages/AdminGate";
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       { path: "/checkout", element: <Checkout /> },
       { path: "/checkout/result", element: <CheckoutResult /> },
 
+      { path: "/admin-gate", element: <AdminGate /> },
       { path: "/admin", element: <Admin /> },
       { path: "/admin/products", element: <AdminProducts /> },
       { path: "/admin/orders", element: <AdminOrders /> },

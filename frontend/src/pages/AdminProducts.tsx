@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminGet, adminPost, adminPatchJson, adminDelete, adminUploadFile } from "../api/adminClient";
+import { Navigate, useLocation } from "react-router-dom";
 
 type ShippingMethod = "post" | "cvs_711" | "cvs_family" | "courier";
 
@@ -38,7 +39,12 @@ function methodLabel(m: ShippingMethod) {
   }
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
+const RAW_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_VITE_API_BASE_URL ||
+  "http://127.0.0.1:8000";
+
+const API_BASE = String(RAW_BASE).replace(/\/+$/, "");
 
 function toAbsUrl(u: string) {
   if (!u) return "";
@@ -47,9 +53,18 @@ function toAbsUrl(u: string) {
   return `${API_BASE}/${u}`;
 }
 
+  const STORAGE_KEY = "admin_unlocked_v1";
+
 // ====== 1️⃣ state 區 ======
 export default function AdminProducts() {
   // ✅ hooks 一律放在 component 內
+  const loc = useLocation();
+  const unlocked = sessionStorage.getItem(STORAGE_KEY) === "1";
+
+  if (!unlocked) {
+    const next = encodeURIComponent(loc.pathname + loc.search);
+    return <Navigate to={`/admin-gate?next=${next}`} replace />;
+  }
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const [list, setList] = useState<AdminProduct[]>([]);
@@ -157,7 +172,7 @@ export default function AdminProducts() {
       // ✅ 編輯模式：用你 startEdit() 已載入的 shippingOptions state
       let shipping_options: Array<{ method: ShippingOption["method"]; fee: number; region_note: string }> = [];
 
-      if (editingId) {
+      if (editingId !== null) {
         // 編輯：用 shippingOptions
         // ※ 若你 shippingOptions 的型別是 ShippingOption[]（含 id），就只取需要欄位
         shipping_options =
@@ -200,7 +215,7 @@ export default function AdminProducts() {
           shipping_options,
         };
 
-        if (editingId) {
+        if (editingId !== null) {
           // ✅ PATCH：更新既有商品
           await adminPatchJson(`/admin/products/${editingId}`, payload);
 
@@ -228,7 +243,6 @@ export default function AdminProducts() {
   function startEdit(p: AdminProduct) {
     setShowCreate(true); // ✅ 進入編輯就打開表單
     setEditingId(p.id);
-    setShowCreate(true); // ✅ 直接展開同一個表單
 
     setName(p.name);
     setCategoryId(p.category_id ?? "uncat");
@@ -324,8 +338,18 @@ export default function AdminProducts() {
               商品管理
             </h2>
 
+            <button
+              type="button"
+              onClick={() => {
+                sessionStorage.removeItem("admin_unlocked_v1");
+                window.location.href = "/products";
+              }}
+            >
+              離開管理模式
+            </button>
+
             {/* ✅ 狀態標籤（不再塞第二個 h2） */}
-            <span className="muted" aria-live="polite">
+            <span className="muted">
               {editingId ? "✏️ 編輯模式" : showCreate ? "➕ 新增模式" : "列表模式"}
             </span>
 
@@ -351,7 +375,7 @@ export default function AdminProducts() {
               onClick={() => {
                 if (showCreate) {
                   setShowCreate(false);
-                  if (editingId) {
+                  if (editingId !== null) {
                     resetForm();
                     setEditingId(null);
                   }
@@ -360,7 +384,7 @@ export default function AdminProducts() {
                 }
               }}
             >
-              {showCreate ? "關閉表單" : editingId ? "編輯商品" : "新增商品"}
+              {showCreate ? "關閉表單" : "新增商品"}
             </button>
 
             <button
@@ -392,9 +416,17 @@ export default function AdminProducts() {
         {showCreate && (
           <section
             aria-label={editingId ? "編輯商品" : "新增商品"}
+            aria-describedby="product-form-help"
+            aria-busy={creating ? "true" : "false"}
             style={{ border: "1px solid #ddd", borderRadius: 12, padding: 12, marginTop: 12 }}
           >
             <h3 style={{ marginTop: 0 }}>{editingId ? "編輯商品" : "新增商品"}</h3>
+
+            <p id="product-form-help" className="muted">
+              {editingId
+                ? "你正在編輯既有商品，儲存後會直接更新此商品。"
+                : "你正在新增商品，送出後會建立一筆新商品。"}
+            </p>
 
             <div style={{ display: "grid", gap: 10, maxWidth: 720 }}>
               <label>
@@ -697,6 +729,7 @@ export default function AdminProducts() {
                   className="btn-success"
                   onClick={submitCreate}
                   disabled={creating}
+                  開啟圖片
                 >
                   {creating ? "送出中..." : editingId ? "儲存修改" : "送出新增"}
                 </button>
@@ -727,7 +760,7 @@ export default function AdminProducts() {
         ) : list.length === 0 ? (
           <p style={{ marginTop: 12 }}>目前沒有商品。</p>
         ) : (
-          <ul style={{ marginTop: 12, display: "grid", gap: 12, padding: 0, listStyle: "none" }}>
+          <ul aria-label="商品列表" style={{ marginTop: 12, display: "grid", gap: 12, padding: 0, listStyle: "none" }}>
             {list.map((p) => {
               const fees = (p.shipping_options ?? []).map((o) => o.fee);
               const minFee = fees.length ? Math.min(...fees) : null;
@@ -758,7 +791,7 @@ export default function AdminProducts() {
                             aria-pressed={p.is_active}
                             onClick={() => toggleActive(p)}
                           >
-                            {p.is_active ? "下架" : "上架"}
+                            aria-label={`${p.name} ${p.is_active ? "下架" : "上架"}`}
                           </button>
 
                           {/* 刪除：危險 */}
@@ -841,6 +874,7 @@ export default function AdminProducts() {
                       uploadImage(p.id, f);
                     }}
                     aria-label={`拖拉圖片到這裡可直接上傳：${p.name}`}
+                    aria-describedby={`upload-help-${p.id}`}
                     style={{
                       marginTop: 10,
                       border: "1px dashed #aaa",
@@ -848,6 +882,10 @@ export default function AdminProducts() {
                       padding: 10,
                     }}
                   >
+                    <p id={`upload-help-${p.id}`} className="sr-only">
+                      可拖曳圖片到此區，或使用下方「選擇檔案」按鈕上傳。
+                    </p>
+
                     <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                       <span>上傳主圖</span>
                       <input
@@ -869,7 +907,7 @@ export default function AdminProducts() {
 
                     {uploadingId === p.id ? <div style={{ marginTop: 6 }}>上傳中...</div> : null}
 
-                    {uploadErr && uploadingId === p.id ? (
+                    {uploadErr ? (
                       <div role="alert" style={{ border: "1px solid red", padding: 8, marginTop: 8 }}>
                         {uploadErr}
                       </div>

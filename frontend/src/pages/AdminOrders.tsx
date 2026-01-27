@@ -1,6 +1,11 @@
 // src/pages/AdminOrders.tsx
-import { useEffect, useMemo, useState } from "react";
-import { adminGet, adminPatch } from "../api/adminClient";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+
+import { adminGet, adminPatchJson } from "../api/adminClient"; // ✅ 用你有的函式
+// 如果你 adminClient 真的有 adminPatch（無 body），再改回 adminPatch
+
+const STORAGE_KEY = "admin_unlocked_v1";
 
 type OrderRow = {
   id: number;
@@ -43,10 +48,21 @@ function labelOf(map: Record<string, string>, key: unknown): string {
 }
 
 export default function AdminOrders() {
+  const detailHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  // ✅ Gate 守門（放在同一個 component 裡）
+  const loc = useLocation();
+  const unlocked = sessionStorage.getItem(STORAGE_KEY) === "1";
+  if (!unlocked) {
+    const next = encodeURIComponent(loc.pathname + loc.search);
+    return <Navigate to={`/admin-gate?next=${next}`} replace />;
+  }
+
   const [list, setList] = useState<OrderRow[]>([]);
   const [full, setFull] = useState<OrderFull | null>(null);
   const [err, setErr] = useState("");
   const [announce, setAnnounce] = useState("");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const STATUS_LABEL = useMemo(
     () => ({
@@ -84,22 +100,32 @@ export default function AdminOrders() {
 
   async function loadList() {
     setErr("");
-    setList(await adminGet("/admin/orders"));
+    setList(await adminGet<OrderRow[]>("/admin/orders"));
   }
 
-  async function loadOne(id: number) {
+  async function loadOne(id: number, opts?: { announce?: boolean }) {
     setErr("");
-    setFull(await adminGet(`/admin/orders/${id}`));
+    setSelectedId(id);
+    const data = await adminGet<OrderFull>(`/admin/orders/${id}`);
+    setFull(data);
+    if (opts?.announce) {
+      setAnnounce(`已載入訂單 #${id} 詳情`);
+    }
+    // 焦點移到詳情標題（維持你原本的可及性設計）
+    setTimeout(() => detailHeadingRef.current?.focus(), 0);
   }
 
   async function setStatus(id: number, status: OrderStatus) {
     try {
-      await adminPatch(`/admin/orders/${id}/status?status=${status}`);
+      setBusy(true);
+      await adminPatchJson(`/admin/orders/${id}/status?status=${status}`, {});
       setAnnounce(`訂單 #${id} 已更新為「${labelOf(STATUS_LABEL, status)}」`);
       await loadList();
-      await loadOne(id);
+      await loadOne(id);  // ❗ 不傳 announce
     } catch (e) {
       setErr(String(e));
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -107,83 +133,101 @@ export default function AdminOrders() {
     loadList().catch((e) => setErr(String(e)));
   }, []);
 
-  return (
-    <main className="admin-scope">
-      <div role="status" aria-live="polite" className="sr-only">
-        {announce}
-      </div>
+  // ...後面你的 return UI 保持原樣即可
 
-      {/* 左：列表 */}
-      <section>
-        <h2>訂單列表</h2>
-        {err && <p className="danger">{err}</p>}
-        <ul>
-          {list.map((o) => (
-            <li key={o.id}>
-              <button className="list-btn" onClick={() => loadOne(o.id)}>
-                #{o.id}｜{labelOf(STATUS_LABEL, o.status)}｜{o.total_amount} 元｜
-                {o.customer_name}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
+    return (
+      <main className="admin-scope" aria-label="訂單管理">
+        <div role="status" aria-live="polite" className="sr-only">
+          {announce}
+        </div>
 
-      {/* 右：詳情 */}
-      <section>
-        <h2>訂單詳情</h2>
+        {/* 左：列表 */}
+        <section aria-label="訂單列表">
+          <h2>訂單列表</h2>
 
-        {!full ? (
-          <p>請從左側選擇訂單</p>
-        ) : (
-          <>
-            <p>
-              <strong>狀態：
-              {labelOf(STATUS_LABEL, full.order.status)}
-              </strong>
+          {err && (
+            <p className="danger" role="alert">
+              {err}
             </p>
+          )}
 
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {STATUSES.map((s) => (
-                <button
-                  key={s}
-                  className="btn"
-                  onClick={() => setStatus(full.order.id, s)}
-                >
-                  {labelOf(STATUS_ACTION_LABEL, s)}
-                </button>
+          <ul aria-label="訂單清單">
+            {list.map((o) => {
+              const isSelected = selectedId === o.id;
+              return (
+                <li key={o.id}>
+                    <button
+                      className="list-btn"
+                      aria-current={selectedId === o.id ? "true" : undefined}
+                      onClick={() => loadOne(o.id, { announce: true })}
+                    >
 
-              ))}
-            </div>
-
-            <hr />
-
-            <p>
-              <strong>買家：</strong>
-              {full.order.customer_name}（{full.order.customer_email}）
-            </p>
-
-            <p>
-              <strong>物流：</strong>
-              {labelOf(SHIPPING_LABEL, full.order.shipping_method)}
-            </p>
-
-            <p>
-              <strong>備註：</strong>
-              {full.order.shipping_address}
-            </p>
-
-            <h3>商品明細</h3>
-            <ul>
-              {full.items.map((it) => (
-                <li key={it.product_id}>
-                  {it.name} × {it.qty}（{it.unit_price}）＝{it.line_total}
+                    #{o.id}｜{labelOf(STATUS_LABEL, o.status)}｜{o.total_amount} 元｜
+                    {o.customer_name}
+                  </button>
                 </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </section>
-    </main>
-  );
-}
+              );
+            })}
+          </ul>
+        </section>
+
+        {/* 右：詳情 */}
+        <section aria-label="訂單詳情">
+          {/* 讓焦點可以移動到這裡：tabIndex=-1 */}
+          <h2 tabIndex={-1} ref={detailHeadingRef}>
+            訂單詳情
+          </h2>
+
+          {!full ? (
+            <p>請從左側選擇訂單</p>
+          ) : (
+            <>
+              <p>
+                <strong>狀態：</strong> {labelOf(STATUS_LABEL, full.order.status)}
+              </p>
+
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {STATUSES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className="btn"
+                    onClick={() => setStatus(full.order.id, s)}
+                    disabled={busy}
+                  >
+                    {labelOf(STATUS_ACTION_LABEL, s)}
+                  </button>
+                ))}
+              </div>
+
+              <hr />
+
+              <p>
+                <strong>買家：</strong>
+                {full.order.customer_name}（{full.order.customer_email}）
+              </p>
+
+              <p>
+                <strong>物流：</strong>
+                {labelOf(SHIPPING_LABEL, full.order.shipping_method)}
+              </p>
+
+              <p>
+                <strong>備註：</strong>
+                {full.order.shipping_address}
+              </p>
+
+              <h3>商品明細</h3>
+              <ul aria-label="商品明細">
+                {full.items.map((it) => (
+                  <li key={`${it.product_id}-${it.name}`}>
+                    {it.name} × {it.qty}（{it.unit_price}）＝{it.line_total}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </section>
+      </main>
+    );
+  }

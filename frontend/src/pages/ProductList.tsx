@@ -167,7 +167,7 @@ export default function ProductList() {
                           }}
                         />
                       ) : (
-                        <span>無圖</span>
+                        <span>尚無圖片</span>
                       )}
                     </button>
 

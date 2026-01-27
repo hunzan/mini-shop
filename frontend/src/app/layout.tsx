@@ -25,8 +25,6 @@ export default function Layout() {
                 {count > 0 && <span className="cart-badge">{count}</span>}
               </span>
             </NavLink>
-
-            {showAdmin && <NavLink to="/admin">管理</NavLink>}
           </nav>
         </div>
       </header>

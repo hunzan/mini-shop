@@ -13,7 +13,7 @@ function joinUrl(base: string, path: string) {
 }
 
 function adminToken() {
-  return import.meta.env.VITE_ADMIN_TOKEN || "";
+  return sessionStorage.getItem("admin_token") || "";
 }
 
 function jsonHeaders(extra?: Record<string, string>) {
