@@ -1,5 +1,10 @@
 // src/api/client.ts
-export const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
+const RAW_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_BASE ||
+  "http://localhost:8000";
+
+export const API_BASE = String(RAW_BASE).replace(/\/+$/, "");
 
 async function parseError(res: Response): Promise<string> {
   // 後端有時回 JSON，有時回純文字；這裡都接得住
@@ -18,7 +23,7 @@ async function parseError(res: Response): Promise<string> {
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const url = `${API_BASE}${path}`;
+  const url = joinUrl(API_BASE, path);
   console.log("GET", url);
 
   const res = await fetch(url, {
@@ -31,7 +36,7 @@ export async function apiGet<T>(path: string): Promise<T> {
 }
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  const url = `${API_BASE}${path}`;
+  const url = joinUrl(API_BASE, path);
 
   const res = await fetch(url, {
     method: "POST",
@@ -48,7 +53,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const url = `${API_BASE}${path}`;
+  const url = joinUrl(API_BASE, path);
 
   const res = await fetch(url, {
     ...init,
