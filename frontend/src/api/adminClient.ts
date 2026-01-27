@@ -1,105 +1,80 @@
-// frontend/src/api/adminClient.ts
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
+// src/api/adminClient.ts
+
+const RAW_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_BASE ||
+  "http://localhost:8000";
+
+const API_BASE = String(RAW_BASE).replace(/\/+$/, "");
+
+function joinUrl(base: string, path: string) {
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${p}`;
+}
 
 function buildHeaders() {
   const token = import.meta.env.VITE_ADMIN_TOKEN || "";
   return {
+    Accept: "application/json",
     "Content-Type": "application/json",
-    "X-Admin-Token": token, // ✅ 唯一權威
+    "X-Admin-Token": token, // ✅ 對應後端 require_admin(x_admin_token=Header)
   };
 }
 
-async function throwIfNotOk(res: Response, prefix: string) {
-  if (res.ok) return;
-  const text = await res.text().catch(() => "");
-  throw new Error(`${prefix} failed: ${res.status} ${text}`);
+async function parseError(res: Response): Promise<string> {
+  try {
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("application/json")) {
+      const data = await res.json();
+      if (typeof data === "string") return data;
+      if (data?.detail) return typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
+      return JSON.stringify(data);
+    }
+    return await res.text();
+  } catch {
+    return `HTTP ${res.status}`;
+  }
 }
 
 export async function adminGet<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    method: "GET",
-    headers: buildHeaders(),
-  });
-  await throwIfNotOk(res, `GET ${path}`);
-
-  // 保險：有些 GET 也可能回空
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) return undefined as T;
-
+  const url = joinUrl(API_BASE, path);
+  const res = await fetch(url, { headers: buildHeaders() });
+  if (!res.ok) throw new Error(await parseError(res));
+  if (res.status === 204) return undefined as unknown as T;
   return (await res.json()) as T;
 }
 
-// ✅ PATCH 有 body（例如：is_active true/false）
-export async function adminPatchJson<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    method: "PATCH",
-    headers: buildHeaders(),
-    body: JSON.stringify(body),
-  });
-  await throwIfNotOk(res, `PATCH ${path}`);
-
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) return undefined as T;
-  return (await res.json()) as T;
-}
-
-// ✅ PATCH 沒有 body（你目前改狀態用 query param）
-export async function adminPatch<T = any>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    method: "PATCH",
-    headers: buildHeaders(),
-  });
-  await throwIfNotOk(res, `PATCH ${path}`);
-
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) return undefined as T;
-  return (await res.json()) as T;
-}
-
-export async function adminPost<T = any>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+export async function adminPost<T>(path: string, body: unknown): Promise<T> {
+  const url = joinUrl(API_BASE, path);
+  const res = await fetch(url, {
     method: "POST",
     headers: buildHeaders(),
     body: JSON.stringify(body),
   });
-  await throwIfNotOk(res, `POST ${path}`);
-
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) return undefined as T;
+  if (!res.ok) throw new Error(await parseError(res));
+  if (res.status === 204) return undefined as unknown as T;
   return (await res.json()) as T;
 }
 
-// ✅ DELETE 通常回 204，回 void 最穩
-export async function adminDelete(path: string): Promise<void> {
-  const res = await fetch(`${BASE}${path}`, {
+export async function adminPut<T>(path: string, body: unknown): Promise<T> {
+  const url = joinUrl(API_BASE, path);
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: buildHeaders(),
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  if (res.status === 204) return undefined as unknown as T;
+  return (await res.json()) as T;
+}
+
+export async function adminDelete<T>(path: string): Promise<T> {
+  const url = joinUrl(API_BASE, path);
+  const res = await fetch(url, {
     method: "DELETE",
     headers: buildHeaders(),
   });
-  await throwIfNotOk(res, `DELETE ${path}`);
-}
-
-export async function adminUploadFile<T = any>(
-  path: string,
-  file: File,
-  fieldName = "file"
-): Promise<T> {
-  const token = import.meta.env.VITE_ADMIN_TOKEN || "";
-
-  const form = new FormData();
-  form.append(fieldName, file);
-
-  const res = await fetch(`${BASE}${path}`, {
-    method: "POST",
-    headers: {
-      "x-admin-token": token,
-      // ❌ 不要加 content-type
-    },
-    body: form,
-  });
-
-  await throwIfNotOk(res, `POST ${path}`);
-
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) return undefined as T;
+  if (!res.ok) throw new Error(await parseError(res));
+  if (res.status === 204) return undefined as unknown as T;
   return (await res.json()) as T;
 }
