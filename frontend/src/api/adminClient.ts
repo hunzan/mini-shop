@@ -1,10 +1,12 @@
-const BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
+const ADMIN_KEY = import.meta.env.VITE_ADMIN_API_KEY;
 
 function buildHeaders() {
   const token = import.meta.env.VITE_ADMIN_TOKEN || "";
   return {
     "content-type": "application/json",
     "x-admin-token": token, // ✅ 與後端 Depends 讀取一致
+    "X-Admin-Key": ADMIN_KEY,
   };
 }
 
