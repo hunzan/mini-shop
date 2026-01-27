@@ -784,15 +784,16 @@ export default function AdminProducts() {
                             編輯
                           </button>
 
-                          {/* 上架 / 下架：次級（狀態切換） */}
-                          <button
-                            type="button"
-                            className={`btn-secondary ${p.is_active ? "is-on" : "is-off"}`}
-                            aria-pressed={p.is_active}
-                            onClick={() => toggleActive(p)}
-                          >
-                            aria-label={`${p.name} ${p.is_active ? "下架" : "上架"}`}
-                          </button>
+                        {/* 上架 / 下架：次級（狀態切換） */}
+                        <button
+                          type="button"
+                          className={`btn-secondary ${p.is_active ? "is-on" : "is-off"}`}
+                          aria-pressed={p.is_active}
+                          aria-label={`${p.name} ${p.is_active ? "下架" : "上架"}`} // 移到這裡
+                          onClick={() => toggleActive(p)}
+                        >
+                          {p.is_active ? "下架" : "上架"} {/* 這裡應該放按鈕要顯示的文字 */}
+                        </button>
 
                           {/* 刪除：危險 */}
                           <button
