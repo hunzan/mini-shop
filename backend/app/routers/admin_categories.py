@@ -11,6 +11,8 @@ from ..schemas.admin_category import (
 )
 from ..deps import require_admin_key
 
+_admin=Depends(require_admin_key)
+
 router = APIRouter(prefix="/admin/categories", tags=["admin"])
 
 

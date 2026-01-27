@@ -12,6 +12,9 @@ import uuid
 from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from ..deps import require_admin_key
+
+_admin=Depends(require_admin_key)
 
 
 router = APIRouter(prefix="/admin/products", tags=["admin-products"])
