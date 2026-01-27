@@ -9,7 +9,7 @@ from ..schemas.admin_category import (
     AdminCategoryCreate,
     AdminCategoryUpdate,
 )
-from ..deps import require_admin
+from ..deps import require_admin_key
 
 router = APIRouter(prefix="/admin/categories", tags=["admin"])
 
