@@ -7,3 +7,4 @@ pydantic-settings==2.6.1
 python-dotenv==1.0.1
 python-multipart
 psycopg[binary]==3.*
+psycopg2-binary
