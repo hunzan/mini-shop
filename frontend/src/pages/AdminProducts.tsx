@@ -734,6 +734,7 @@ export default function AdminProducts() {
                   </button>
                 </div>
 
+            <div>
                 <button
                   type="button"
                   className="btn-muted"
@@ -741,8 +742,6 @@ export default function AdminProducts() {
                 >
                   清空表單
                 </button>
-
-              </div>
 
               {/* ✅ 編輯提示 */}
               {editingId ? (
