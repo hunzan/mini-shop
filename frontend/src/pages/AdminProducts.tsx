@@ -689,52 +689,51 @@ export default function AdminProducts() {
                     )}
                   </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
-                  {/* Checkbox 部分 */}
-                  <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-                    <input
-                      type="checkbox"
-                      checked={shipCourierOn}
-                      onChange={(e) => setShipCourierOn(e.target.checked)}
-                    />
-                    <strong>快遞（限區域）</strong>
-                  </label>
-
-                  {shipCourierOn && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                      {/* 運費群組：避免 運費 與 數字框 被拆散 */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <input type="checkbox" checked={shipCourierOn} onChange={(e) => setShipCourierOn(e.target.checked)} />
+                      快遞（限區域）
+                    </label>
+                    {shipCourierOn && (
+                      <>
                         <span>運費</span>
                         <input
                           type="number"
-                          value={shipCourierFee === 0 ? "" : shipCourierFee} // 改善清空時的體驗
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setShipCourierFee(val === "" ? 0 : Math.max(0, Number(val)));
-                          }}
-                          style={{ width: 80, padding: "6px 8px" }}
+                          value={shipCourierFee}
+                          onChange={(e) => setShipCourierFee(Number(e.target.value))}
+                          style={{ width: 120, padding: 8 }}
                           min={0}
                           inputMode="numeric"
-                          placeholder="0"
+                          aria-label="快遞運費"
                         />
                         <span>元</span>
-                      </div>
+                        <input
+                          value={shipCourierRegion}
+                          onChange={(e) => setShipCourierRegion(e.target.value)}
+                          style={{ minWidth: 240, padding: 8 }}
+                          placeholder="例如：限雙北 / 限台北市"
+                          aria-label="快遞限區說明"
+                        />
+                      </>
+                    )}
+                  </div>
 
-                      {/* 區域說明 */}
-                      <input
-                        value={shipCourierRegion}
-                        onChange={(e) => setShipCourierRegion(e.target.value)}
-                        style={{ minWidth: 200, padding: "6px 8px", flex: "1 1 auto" }}
-                        placeholder="例如：限雙北區域"
-                      />
-                    </div>
-                  )}
+                  <p style={{ margin: "10px 0 0 0" }}>
+                    ※ 買家結帳只會看到你勾選的選項。
+                  </p>
+                </fieldset>
+              )}
+
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    className="btn-success"
+                    onClick={submitCreate}
+                    disabled={creating}
+                  >
+                    {creating ? "送出中..." : editingId ? "儲存修改" : "送出新增"}
+                  </button>
                 </div>
-
-                {/* 提示文字優化：顏色稍微調淡，區隔主功能 */}
-                <p style={{ margin: "8px 0 0 0", fontSize: "0.9rem", color: "#666" }}>
-                  ※ 買家結帳只會看到你勾選的選項。
-                </p>
 
             <div>
                 <button
