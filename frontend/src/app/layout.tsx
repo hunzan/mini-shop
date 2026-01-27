@@ -15,7 +15,7 @@ export default function Layout() {
 
       <header className="site-header">
         <div className="container row-between">
-          <Link to="/" className="brand">思融的精品店 v2026-01-27-01</Link>
+          <Link to="/" className="brand">思融的精品店</Link>
 
           <nav aria-label="主要導覽" className="nav">
             <NavLink to="/products">商品</NavLink>
