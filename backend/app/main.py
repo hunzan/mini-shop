@@ -19,15 +19,22 @@ UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"  # backend/uploa
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
+# ✅ CORS
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+# 線上前端（從 ENV 讀；你 Railway 要設 FRONTEND_ORIGIN）
+if settings.frontend_origin:
+    origins.append(settings.frontend_origin)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
-    allow_credentials=True,
+    allow_origins=origins,          # ✅ 加入 https://julie-shop.up.railway.app
+    allow_credentials=False,        # ✅ 你現在用 token header，不需要 cookies
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"],            # ✅ 允許 X-Admin-Token
 )
 
 Base.metadata.create_all(bind=engine)
