@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node -p \"process.env.VITE_ADMIN_TOKEN ? 'HAS_TOKEN' : 'NO_TOKEN'\" && tsc -b && vite build",
+    "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
