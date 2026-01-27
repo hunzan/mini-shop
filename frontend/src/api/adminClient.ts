@@ -26,7 +26,7 @@ function jsonHeaders(extra?: Record<string, string>) {
 }
 
 function authHeaders(extra?: Record<string, string>) {
-  // 給上傳用：不強制 Content-Type，讓瀏覽器自動帶 multipart boundary
+  // 給上傳用：不要固定 Content-Type，讓瀏覽器自動帶 multipart boundary
   return {
     Accept: "application/json",
     "X-Admin-Token": adminToken(),
@@ -61,12 +61,17 @@ async function ensureOk<T>(res: Response): Promise<T> {
   return (await res.json()) as T;
 }
 
-// -------- 基本 CRUD（你以後也可以用） --------
+// -------- 基本 --------
 
 export async function adminGet<T>(path: string): Promise<T> {
   const url = joinUrl(API_BASE, path);
   const res = await fetch(url, { headers: authHeaders() });
   return ensureOk<T>(res);
+}
+
+// ✅ 舊介面相容：很多檔案在用 adminPost
+export async function adminPost<T>(path: string, body: unknown): Promise<T> {
+  return adminPostJson<T>(path, body);
 }
 
 export async function adminPostJson<T>(path: string, body: unknown): Promise<T> {
@@ -98,28 +103,20 @@ export async function adminDelete<T>(path: string): Promise<T> {
   return ensureOk<T>(res);
 }
 
-// -------- 你目前缺的：PATCH & PATCH JSON --------
-
-export async function adminPatch<T>(
-  path: string,
-  init?: RequestInit
-): Promise<T> {
+export async function adminPatch<T>(path: string, init?: RequestInit): Promise<T> {
   const url = joinUrl(API_BASE, path);
   const res = await fetch(url, {
     method: "PATCH",
     ...init,
     headers: {
       ...(init?.headers || {}),
-      ...authHeaders(), // 確保一定帶 token
+      ...authHeaders(),
     },
   });
   return ensureOk<T>(res);
 }
 
-export async function adminPatchJson<T>(
-  path: string,
-  body: unknown
-): Promise<T> {
+export async function adminPatchJson<T>(path: string, body: unknown): Promise<T> {
   const url = joinUrl(API_BASE, path);
   const res = await fetch(url, {
     method: "PATCH",
@@ -129,17 +126,29 @@ export async function adminPatchJson<T>(
   return ensureOk<T>(res);
 }
 
-// -------- 你目前缺的：上傳檔案 --------
-
+// ✅ 相容：允許直接傳 File（呼叫端不用改）
+// 也允許傳 FormData（更彈性）
 export async function adminUploadFile<T>(
   path: string,
-  formData: FormData
+  fileOrForm: File | FormData,
+  fieldName = "file"
 ): Promise<T> {
   const url = joinUrl(API_BASE, path);
+
+  const form =
+    fileOrForm instanceof FormData
+      ? fileOrForm
+      : (() => {
+          const fd = new FormData();
+          fd.append(fieldName, fileOrForm);
+          return fd;
+        })();
+
   const res = await fetch(url, {
     method: "POST",
-    headers: authHeaders(), // 不要 Content-Type
-    body: formData,
+    headers: authHeaders(),
+    body: form,
   });
+
   return ensureOk<T>(res);
 }

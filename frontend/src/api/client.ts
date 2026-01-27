@@ -1,5 +1,4 @@
 // src/api/client.ts
-
 const RAW_BASE =
   import.meta.env.VITE_API_BASE_URL ||
   import.meta.env.VITE_API_BASE ||
@@ -7,21 +6,14 @@ const RAW_BASE =
 
 export const API_BASE = String(RAW_BASE).replace(/\/+$/, "");
 
-function joinUrl(base: string, path: string) {
-  const p = path.startsWith("/") ? path : `/${path}`;
-  return `${base}${p}`;
-}
-
 async function parseError(res: Response): Promise<string> {
+  // 後端有時回 JSON，有時回純文字；這裡都接得住
   const contentType = res.headers.get("content-type") || "";
   try {
     if (contentType.includes("application/json")) {
       const data = await res.json();
       if (typeof data === "string") return data;
-      if (data?.detail)
-        return typeof data.detail === "string"
-          ? data.detail
-          : JSON.stringify(data.detail);
+      if (data?.detail) return typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
       return JSON.stringify(data);
     }
     return await res.text();
@@ -75,8 +67,10 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   if (!res.ok) throw new Error(await parseError(res));
   if (res.status === 204) return undefined as unknown as T;
 
+  // 兼容：有些回傳不是 json（極少），就用 text
   const ct = res.headers.get("content-type") || "";
   if (!ct.includes("application/json")) return (await res.text()) as unknown as T;
 
   return (await res.json()) as T;
 }
+
