@@ -7,8 +7,6 @@ export default function Layout() {
   const items = useCartStore((s) => s.items ?? []);
   const count = items.reduce((sum, it) => sum + (it.qty ?? 0), 0);
   const showAdmin = Boolean(import.meta.env.VITE_ADMIN_TOKEN);
-  console.log("admin token:", import.meta.env.VITE_ADMIN_TOKEN);
-
 
   return (
     <div>
@@ -17,7 +15,7 @@ export default function Layout() {
 
       <header className="site-header">
         <div className="container row-between">
-          <Link to="/" className="brand">思融的精品店</Link>
+          <Link to="/" className="brand">思融的精品店 v2026-01-27-01</Link>
 
           <nav aria-label="主要導覽" className="nav">
             <NavLink to="/products">商品</NavLink>
