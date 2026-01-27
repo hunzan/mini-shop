@@ -6,7 +6,7 @@ import { useCartStore } from "../store/cartStore";
 export default function Layout() {
   const items = useCartStore((s) => s.items ?? []);
   const count = items.reduce((sum, it) => sum + (it.qty ?? 0), 0);
-  const showAdmin = import.meta.env.VITE_SHOW_ADMIN === "1";
+  const showAdmin = Boolean(import.meta.env.VITE_ADMIN_TOKEN);
 
   return (
     <div>
