@@ -6,3 +6,5 @@ def require_admin(x_admin_token: str | None = Header(default=None)):
         raise HTTPException(status_code=500, detail="ADMIN_TOKEN not set")
     if x_admin_token != settings.admin_token:
         raise HTTPException(status_code=401, detail="Unauthorized")
+
+require_admin_key = require_admin
