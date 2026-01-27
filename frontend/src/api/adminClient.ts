@@ -100,6 +100,21 @@ export async function adminPatchJson<T>(path: string, body: unknown): Promise<T>
   return ensureOk<T>(res);
 }
 
+export async function adminPatch<T>(path: string, init?: RequestInit): Promise<T> {
+  const url = joinUrl(API_BASE, path);
+
+  const res = await fetch(url, {
+    method: "PATCH",
+    ...init,
+    headers: {
+      ...(init?.headers || {}),
+      ...authHeaders(),
+    },
+  });
+
+  return ensureOk<T>(res);
+}
+
 export async function adminDelete<T>(path: string): Promise<T> {
   const url = joinUrl(API_BASE, path);
   const res = await fetch(url, { method: "DELETE", headers: authHeaders() });

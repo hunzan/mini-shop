@@ -6,6 +6,11 @@ const RAW_BASE =
 
 export const API_BASE = String(RAW_BASE).replace(/\/+$/, "");
 
+function joinUrl(base: string, path: string) {
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${p}`;
+}
+
 async function parseError(res: Response): Promise<string> {
   // 後端有時回 JSON，有時回純文字；這裡都接得住
   const contentType = res.headers.get("content-type") || "";
