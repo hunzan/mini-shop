@@ -513,6 +513,7 @@ export default function AdminProducts() {
                   style={{ display: "block", width: "100%", padding: 8, minHeight: 120 }}
                 />
               </label>
+            </div>
 
             {editingId && (
               <fieldset style={{ border: "1px solid #ccc", padding: 12, borderRadius: 10 }}>
