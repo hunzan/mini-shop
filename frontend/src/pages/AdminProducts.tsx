@@ -847,9 +847,6 @@ export default function AdminProducts() {
                     <strong>主圖：</strong>{" "}
                     {p.image_url ? (
                       <>
-                        <a href={toAbsUrl(p.image_url)} target="_blank" rel="noreferrer">
-                          開啟圖片
-                        </a>
                         <div style={{ marginTop: 8 }}>
                           <img
                             src={toAbsUrl(p.image_url)}

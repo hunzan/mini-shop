@@ -79,12 +79,7 @@ export default function AdminGate() {
           >
             清除
           </button>
-
-          <button type="button" className="btn" onClick={() => nav("/products")}>
-            回商品頁
-          </button>
         </div>
-
         <p>
           <small>
             提醒：若你不是管理者，請回到{" "}
