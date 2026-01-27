@@ -65,3 +65,9 @@ def dev_seed():
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+
+@app.get("/debug/cors")
+def debug_cors():
+    return {
+        "frontend_origin": settings.frontend_origin,
+    }
