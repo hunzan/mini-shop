@@ -1,7 +1,8 @@
+// src/pages/AdminGate.tsx
 import { useEffect, useId, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
-const GATE_PASS = "rabbit-1234"; // ✅ 教學用：你要寫死就寫死（之後要改再改碼）
+const GATE_PASS = "rabbit-1234";
 const STORAGE_KEY = "admin_unlocked_v1";
 
 export default function AdminGate() {
@@ -39,37 +40,46 @@ export default function AdminGate() {
     nav(next, { replace: true });
   }
 
-  return (
-    <section className="card" aria-labelledby="gate-title">
-      <h1 id="gate-title">管理入口</h1>
+  const describedBy = err ? `${hintId} ${errId}` : hintId;
 
-      <p id={hintId}>
+  return (
+    <section className="card gate" aria-labelledby="gate-title">
+      <h1 id="gate-title" className="gate__title">管理入口</h1>
+
+      <p id={hintId} className="gate__hint">
         這是「管理者」專用入口。買家逛商店不需要這個頁面。
       </p>
 
-      <form onSubmit={submit} className="stack" aria-describedby={hintId}>
-        <label htmlFor={inputId}>管理密碼</label>
-        <input
-          id={inputId}
-          ref={passRef}
-          type="password"
-          inputMode="text"
-          autoComplete="current-password"
-          value={pass}
-          onChange={(e) => setPass(e.target.value)}
-          aria-invalid={err ? "true" : "false"}
-          aria-describedby={err ? errId : undefined}
-        />
+      <form onSubmit={submit} className="gate__form" aria-describedby={hintId}>
+        <div className="gate__field">
+          <label className="gate__label" htmlFor={inputId}>管理密碼</label>
+          <input
+            className="gate__input"
+            id={inputId}
+            ref={passRef}
+            type="password"
+            inputMode="text"
+            autoComplete="current-password"
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
+            aria-invalid={err ? "true" : "false"}
+            aria-describedby={describedBy}
+          />
+        </div>
 
         {err && (
-          <p id={errId} role="alert">
+          <p id={errId} role="alert" className="gate__error">
             {err}
           </p>
         )}
 
-        <div className="row">
-          <button type="submit">進入管理頁</button>
+        <div className="gate__actions">
+          <button className="btn gate__primary" type="submit" aria-label="進入管理頁">
+            進入管理頁
+          </button>
+
           <button
+            className="btn gate__secondary"
             type="button"
             onClick={() => {
               setPass("");
@@ -80,10 +90,10 @@ export default function AdminGate() {
             清除
           </button>
         </div>
-        <p>
+
+        <p className="gate__footer">
           <small>
-            提醒：若你不是管理者，請回到{" "}
-            <a href="/products">商品頁</a>。
+            提醒：若你不是管理者，請回到 <a href="/products">商品頁</a>。
           </small>
         </p>
       </form>

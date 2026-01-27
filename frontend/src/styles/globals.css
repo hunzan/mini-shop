@@ -348,7 +348,10 @@ a { color: inherit; text-decoration: none; }
   padding: 12px 24px;
 }
 
-.brand { font-weight: 700; }
+.brand {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
 
 .nav a {
   margin-left: 12px;
@@ -1114,5 +1117,170 @@ h1.product-title{
 @media (max-width: 640px){
   .checkout-title{
     font-size: 1.4rem; /* 約 21px */
+  }
+}
+/* AdminGate 專用 */
+.gate {
+  max-width: 520px;
+  margin: 24px auto;
+  padding: 18px;
+}
+
+.gate__title {
+  margin: 0 0 10px 0;
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+
+.gate__hint {
+  margin: 0 0 14px 0;
+  opacity: 0.85;
+}
+
+.gate__form {
+  display: grid;
+  gap: 12px; /* 每個區塊間距 */
+}
+
+/* label + input 的距離，避免疊到 */
+.gate__field {
+  display: grid;
+  gap: 8px;
+}
+
+.gate__label {
+  font-weight: 600;
+}
+
+.gate__input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+/* 錯誤訊息 */
+.gate__error {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #e11;
+  border-radius: 10px;
+}
+
+/* 按鈕區：桌機橫排、手機直排 */
+.gate__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.gate__actions .btn {
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+
+/* 主次：主按鈕稍微更顯眼 */
+.gate__primary {
+  font-weight: 700;
+}
+
+/* 次要按鈕稍微淡一點 */
+.gate__secondary {
+  opacity: 0.9;
+}
+
+/* 底部提示 */
+.gate__footer {
+  margin: 4px 0 0 0;
+  opacity: 0.85;
+}
+
+/* 手機：按鈕佔滿寬、變直排更好按 */
+@media (max-width: 480px) {
+  .gate {
+    margin: 16px auto;
+    padding: 16px;
+  }
+
+  .gate__actions {
+    flex-direction: column;
+  }
+
+  .gate__actions .btn {
+    width: 100%;
+  }
+}
+/* 右上角導覽：維持左右排，不要擠到標題 */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+/* 讓 NavLink 看起來像按鈕 */
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  text-decoration: none;
+  white-space: nowrap;
+
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+  padding: 10px 14px;
+
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.10);
+  background: rgba(255, 255, 255, 0.92);
+
+  font-weight: 700;
+  font-size: 1rem;          /* 桌機：稍大 */
+  line-height: 1;
+
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.nav-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
+  background: rgba(255, 255, 255, 1);
+}
+
+/* 目前所在頁：更好辨識 */
+.nav-btn.active {
+  border-color: rgba(0, 0, 0, 0.30);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
+}
+
+/* 購物車 badge 也稍微立體一點 */
+.cart-badge {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.85em;
+  font-weight: 800;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* ✅ 手機：按鈕更小，但仍左右排，避免擠到品牌 */
+@media (max-width: 480px) {
+  .nav-actions {
+    gap: 6px;
+  }
+
+  .nav-btn {
+    padding: 7px 10px;      /* 手機：小一點 */
+    font-size: 0.92rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.10);
+  }
+
+  .cart-badge {
+    padding: 1px 6px;
   }
 }

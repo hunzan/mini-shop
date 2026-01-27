@@ -15,11 +15,14 @@ export default function Layout() {
 
       <header className="site-header">
         <div className="container row-between">
-          <Link to="/" className="brand">思融的精品店</Link>
+          <Link to="/" className="brand">🐰思融的精品店🥕</Link>
 
-          <nav aria-label="主要導覽" className="nav">
-            <NavLink to="/products">商品</NavLink>
-            <NavLink to="/cart" aria-label={`購物車，目前 ${count} 件`}>
+          <nav aria-label="主要導覽" className="nav nav-actions">
+            <NavLink to="/products" className="nav-btn">
+              商品
+            </NavLink>
+
+            <NavLink to="/cart" className="nav-btn" aria-label={`購物車，目前 ${count} 件`}>
               <span className="nav-cart">
                 購物車
                 {count > 0 && <span className="cart-badge">{count}</span>}
