@@ -34,35 +34,77 @@ function authHeaders(extra?: Record<string, string>) {
   };
 }
 
+function clearAdminSession() {
+  sessionStorage.removeItem("admin_unlocked_v1");
+  sessionStorage.removeItem("admin_token");
+}
+
 async function parseError(res: Response): Promise<string> {
+  const statusPrefix = `[HTTP ${res.status}] `;
+
+  if (res.status === 401) {
+    return (
+      statusPrefix +
+      "沒有權限：管理驗證失敗，或登入已過期。請回到「管理入口」重新輸入密碼。"
+    );
+  }
+
   try {
+    const rawText = await res.text();
     const ct = res.headers.get("content-type") || "";
-    if (ct.includes("application/json")) {
-      const data = await res.json();
-      if (typeof data === "string") return data;
-      if (data?.detail)
-        return typeof data.detail === "string"
-          ? data.detail
-          : JSON.stringify(data.detail);
-      return JSON.stringify(data);
+
+    if (ct.includes("application/json") && rawText) {
+      try {
+        const data = JSON.parse(rawText);
+
+        if (typeof data === "string") return `${statusPrefix}${data}`;
+
+        if (data?.detail) {
+          if (data.detail === "ADMIN_TOKEN not set") {
+            return `${statusPrefix}伺服器尚未設定管理權杖（ADMIN_TOKEN），請聯絡網管。`;
+          }
+          return `${statusPrefix}${
+            typeof data.detail === "string"
+              ? data.detail
+              : JSON.stringify(data.detail)
+          }`;
+        }
+
+        return `${statusPrefix}${JSON.stringify(data)}`;
+      } catch {
+        return `${statusPrefix}${rawText}`;
+      }
     }
-    return await res.text();
+
+    return rawText
+      ? `${statusPrefix}${rawText}`
+      : `錯誤代碼：${res.status}`;
   } catch {
-    return `HTTP ${res.status}`;
+    return `${statusPrefix}無法解析錯誤訊息`;
   }
 }
 
 async function ensureOk<T>(res: Response): Promise<T> {
-  if (!res.ok) throw new Error(await parseError(res));
+  if (!res.ok) {
+    // ✅ 401：立刻清掉管理狀態
+    if (res.status === 401) {
+      clearAdminSession();
+    }
+
+    throw new Error(await parseError(res));
+  }
+
   if (res.status === 204) return undefined as unknown as T;
 
   const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) return (await res.text()) as unknown as T;
+  if (!ct.includes("application/json")) {
+    return (await res.text()) as unknown as T;
+  }
+
   return (await res.json()) as T;
 }
 
 // ✅ 你需要的：adminGet / adminPost / adminPatchJson
-
 export async function adminGet<T>(path: string): Promise<T> {
   const url = joinUrl(API_BASE, path);
   const res = await fetch(url, { headers: authHeaders() });

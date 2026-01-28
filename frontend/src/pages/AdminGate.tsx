@@ -2,6 +2,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
+const ADMIN_TOKEN = import.meta.env.VITE_ADMIN_TOKEN || "";
 const GATE_PASS = "rabbit-1234";
 const STORAGE_KEY = "admin_unlocked_v1";
 
@@ -36,6 +37,12 @@ export default function AdminGate() {
       return;
     }
 
+    if (!ADMIN_TOKEN) {
+      setErr("系統未設定管理權杖（VITE_ADMIN_TOKEN）。請聯絡網管處理。");
+      return;
+    }
+
+    sessionStorage.setItem("admin_token", ADMIN_TOKEN);
     sessionStorage.setItem(STORAGE_KEY, "1");
     nav(next, { replace: true });
   }

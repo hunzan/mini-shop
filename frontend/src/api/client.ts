@@ -12,18 +12,37 @@ function joinUrl(base: string, path: string) {
 }
 
 async function parseError(res: Response): Promise<string> {
-  // 後端有時回 JSON，有時回純文字；這裡都接得住
-  const contentType = res.headers.get("content-type") || "";
+  const statusPrefix = `[HTTP ${res.status}] `;
+
+  // 常見狀態碼中文化（買家端也會遇到）
+  if (res.status === 404) return `${statusPrefix}找不到資源。`;
+  if (res.status === 429) return `${statusPrefix}請求太頻繁，請稍後再試。`;
+  if (res.status >= 500) return `${statusPrefix}伺服器暫時忙碌，請稍後再試。`;
+
   try {
-    if (contentType.includes("application/json")) {
-      const data = await res.json();
-      if (typeof data === "string") return data;
-      if (data?.detail) return typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
-      return JSON.stringify(data);
+    const rawText = await res.text();
+    const ct = res.headers.get("content-type") || "";
+
+    if (ct.includes("application/json") && rawText) {
+      try {
+        const data = JSON.parse(rawText);
+        if (typeof data === "string") return `${statusPrefix}${data}`;
+        if (data?.detail) {
+          return `${statusPrefix}${
+            typeof data.detail === "string"
+              ? data.detail
+              : JSON.stringify(data.detail)
+          }`;
+        }
+        return `${statusPrefix}${JSON.stringify(data)}`;
+      } catch {
+        return `${statusPrefix}${rawText}`;
+      }
     }
-    return await res.text();
+
+    return rawText ? `${statusPrefix}${rawText}` : `${statusPrefix}發生錯誤`;
   } catch {
-    return `HTTP ${res.status}`;
+    return `${statusPrefix}無法解析錯誤訊息`;
   }
 }
 

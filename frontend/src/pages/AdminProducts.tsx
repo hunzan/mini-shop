@@ -338,16 +338,6 @@ export default function AdminProducts() {
               商品管理
             </h2>
 
-            <button
-              type="button"
-              onClick={() => {
-                sessionStorage.removeItem("admin_unlocked_v1");
-                window.location.href = "/products";
-              }}
-            >
-              離開管理模式
-            </button>
-
             {/* ✅ 狀態標籤（不再塞第二個 h2） */}
             <span className="muted">
               {editingId ? "✏️ 編輯模式" : showCreate ? "➕ 新增模式" : "列表模式"}
