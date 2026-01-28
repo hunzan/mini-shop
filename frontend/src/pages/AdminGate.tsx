@@ -19,6 +19,7 @@ export default function AdminGate() {
 
   const unlocked = sessionStorage.getItem(STORAGE_KEY) === "1";
   const next = new URLSearchParams(loc.search).get("next") || "/admin";
+  const token = import.meta.env.VITE_ADMIN_TOKEN;
 
   useEffect(() => {
     passRef.current?.focus();
