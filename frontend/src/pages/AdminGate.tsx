@@ -2,9 +2,11 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
-const ADMIN_TOKEN = import.meta.env.VITE_ADMIN_TOKEN || "";
+// 直接讓它 = 後端的 ADMIN_TOKEN，前端輸入的就是後端驗證用的 token
 const GATE_PASS = "rabbit@0963";
+
 const STORAGE_KEY = "admin_unlocked_v1";
+const TOKEN_KEY = "admin_token";
 
 export default function AdminGate() {
   const nav = useNavigate();
@@ -42,7 +44,7 @@ export default function AdminGate() {
       return;
     }
 
-    sessionStorage.setItem("admin_token", ADMIN_TOKEN);
+    sessionStorage.setItem(TOKEN_KEY, pass);
     sessionStorage.setItem(STORAGE_KEY, "1");
     nav(next, { replace: true });
   }
