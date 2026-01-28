@@ -9,14 +9,6 @@ import AdminCategories from "./AdminCategories";
 const STORAGE_KEY = "admin_unlocked_v1";
 
 export default function Admin() {
-  const loc = useLocation();
-  const unlocked = sessionStorage.getItem(STORAGE_KEY) === "1";
-
-  // ✅ Gate：沒解鎖就送去 /admin-gate（並記住要回來的頁）
-  if (!unlocked) {
-    const next = encodeURIComponent(loc.pathname + loc.search);
-    return <Navigate to={`/admin-gate?next=${next}`} replace />;
-  }
 
   const [tab, setTab] = useState<"orders" | "products" | "categories">("orders");
   const [announce, setAnnounce] = useState("");

@@ -12,6 +12,8 @@ import Admin from "../pages/Admin";
 import AdminProducts from "../pages/AdminProducts";
 import AdminOrders from "../pages/AdminOrders";
 import AdminGate from "../pages/AdminGate";
+import RequireAdmin from "../components/Admin/RequireAdmin";
+import AdminCategories from "../pages/AdminCategories";
 
 export const router = createBrowserRouter([
   {
@@ -24,10 +26,14 @@ export const router = createBrowserRouter([
       { path: "/checkout", element: <Checkout /> },
       { path: "/checkout/result", element: <CheckoutResult /> },
 
+      // ✅ 管理入口不包 RequireAdmin
       { path: "/admin-gate", element: <AdminGate /> },
-      { path: "/admin", element: <Admin /> },
-      { path: "/admin/products", element: <AdminProducts /> },
-      { path: "/admin/orders", element: <AdminOrders /> },
+
+      // ✅ 後台路由全部包起來
+      { path: "/admin", element: <RequireAdmin><Admin /></RequireAdmin> },
+      { path: "/admin/products", element: <RequireAdmin><AdminProducts /></RequireAdmin> },
+      { path: "/admin/orders", element: <RequireAdmin><AdminOrders /></RequireAdmin> },
+      { path: "/admin/categories", element: <RequireAdmin><AdminCategories /></RequireAdmin> },
     ],
   },
 ]);

@@ -1,6 +1,5 @@
 // src/pages/AdminOrders.tsx
 import { useEffect, useMemo, useState, useRef } from "react";
-import { Navigate, useLocation } from "react-router-dom";
 
 import { adminGet, adminPatchJson } from "../api/adminClient"; // ✅ 用你有的函式
 // 如果你 adminClient 真的有 adminPatch（無 body），再改回 adminPatch
@@ -49,14 +48,6 @@ function labelOf(map: Record<string, string>, key: unknown): string {
 
 export default function AdminOrders() {
   const detailHeadingRef = useRef<HTMLHeadingElement | null>(null);
-  // ✅ Gate 守門（放在同一個 component 裡）
-  const loc = useLocation();
-  const unlocked = sessionStorage.getItem(STORAGE_KEY) === "1";
-  if (!unlocked) {
-    const next = encodeURIComponent(loc.pathname + loc.search);
-    return <Navigate to={`/admin-gate?next=${next}`} replace />;
-  }
-
   const [list, setList] = useState<OrderRow[]>([]);
   const [full, setFull] = useState<OrderFull | null>(null);
   const [err, setErr] = useState("");

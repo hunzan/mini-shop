@@ -57,23 +57,13 @@ function toAbsUrl(u: string) {
 
 // ====== 1️⃣ state 區 ======
 export default function AdminProducts() {
-  // ✅ hooks 一律放在 component 內
-  const loc = useLocation();
-  const unlocked = sessionStorage.getItem(STORAGE_KEY) === "1";
 
-  if (!unlocked) {
-    const next = encodeURIComponent(loc.pathname + loc.search);
-    return <Navigate to={`/admin-gate?next=${next}`} replace />;
-  }
   const [editingId, setEditingId] = useState<number | null>(null);
-
   const [list, setList] = useState<AdminProduct[]>([]);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
-
   const [categories, setCategories] = useState<Category[]>([]);
   const [creating, setCreating] = useState(false);
-
   const [showCreate, setShowCreate] = useState(false);
 
   // 表單 state（新增 + 編輯共用）

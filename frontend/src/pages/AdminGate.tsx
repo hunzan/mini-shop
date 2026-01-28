@@ -2,9 +2,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
-// 直接讓它 = 後端的 ADMIN_TOKEN，前端輸入的就是後端驗證用的 token
 const GATE_PASS = "rabbit@0963";
-
 const STORAGE_KEY = "admin_unlocked_v1";
 const TOKEN_KEY = "admin_token";
 
@@ -17,9 +15,16 @@ export default function AdminGate() {
   const passRef = useRef<HTMLInputElement | null>(null);
 
   const [pass, setPass] = useState("");
-  const [err, setErr] = useState<string>("");
+  const [err, setErr] = useState("");
 
-  const unlocked = sessionStorage.getItem(STORAGE_KEY) === "1";
+  // ✅ token 來自 build-time env（Vite）
+  const token = import.meta.env.VITE_ADMIN_TOKEN || "";
+
+  // ✅ 只有「已解鎖 + token 也存在」才算真的解鎖
+  const unlocked =
+    sessionStorage.getItem(STORAGE_KEY) === "1" &&
+    Boolean(sessionStorage.getItem(TOKEN_KEY));
+
   const next = new URLSearchParams(loc.search).get("next") || "/admin";
 
   useEffect(() => {
@@ -28,21 +33,32 @@ export default function AdminGate() {
 
   if (unlocked) return <Navigate to={next} replace />;
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
+  function submit(e?: React.FormEvent) {
+    e?.preventDefault();
     setErr("");
 
+    console.log("[AdminGate] submit fired");
+    console.log("[AdminGate] token exists?", Boolean(token), "len=", token.length);
+
     if (pass !== GATE_PASS) {
+      console.log("[AdminGate] wrong password");
       setErr("密碼不正確，請再試一次。");
       setPass("");
       passRef.current?.focus();
       return;
     }
 
-    // ✅ 關鍵：不用 VITE_ADMIN_TOKEN
-    // 直接把「輸入的密碼」當作 token 交給後端驗證
-    sessionStorage.setItem(TOKEN_KEY, pass);
+    if (!token) {
+      console.log("[AdminGate] missing VITE_ADMIN_TOKEN");
+      setErr("系統未設定管理權杖（VITE_ADMIN_TOKEN）。請聯絡網管處理。");
+      return;
+    }
+
+    sessionStorage.setItem(TOKEN_KEY, token);
     sessionStorage.setItem(STORAGE_KEY, "1");
+
+    console.log("[AdminGate] after setItem admin_token =", sessionStorage.getItem(TOKEN_KEY));
+
     nav(next, { replace: true });
   }
 
@@ -64,7 +80,6 @@ export default function AdminGate() {
             id={inputId}
             ref={passRef}
             type="password"
-            inputMode="text"
             autoComplete="current-password"
             value={pass}
             onChange={(e) => setPass(e.target.value)}
@@ -80,7 +95,12 @@ export default function AdminGate() {
         )}
 
         <div className="gate__actions">
-          <button className="btn gate__primary" type="submit" aria-label="進入管理頁">
+          {/* ✅ 保險：onClick 也呼叫 submit，避免 onSubmit 沒觸發 */}
+          <button
+            className="btn gate__primary"
+            type="submit"
+            onClick={() => submit()}
+          >
             進入管理頁
           </button>
 
