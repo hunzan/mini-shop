@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 const ADMIN_TOKEN = import.meta.env.VITE_ADMIN_TOKEN || "";
-const GATE_PASS = "rabbit-1234";
+const GATE_PASS = "rabbit@0963";
 const STORAGE_KEY = "admin_unlocked_v1";
 
 export default function AdminGate() {
