@@ -39,11 +39,8 @@ export default function AdminGate() {
       return;
     }
 
-    if (!ADMIN_TOKEN) {
-      setErr("系統未設定管理權杖（VITE_ADMIN_TOKEN）。請聯絡網管處理。");
-      return;
-    }
-
+    // ✅ 關鍵：不用 VITE_ADMIN_TOKEN
+    // 直接把「輸入的密碼」當作 token 交給後端驗證
     sessionStorage.setItem(TOKEN_KEY, pass);
     sessionStorage.setItem(STORAGE_KEY, "1");
     nav(next, { replace: true });
