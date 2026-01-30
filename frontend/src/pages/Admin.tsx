@@ -1,7 +1,8 @@
 // src/pages/Admin.tsx
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { clearAdminSession } from "../utils/adminSession";
+import { clearAdminSession, isAdminUnlocked } from "../utils/adminSession";
+
 
 export default function Admin() {
   const [announce, setAnnounce] = useState("");
@@ -11,6 +12,17 @@ export default function Admin() {
   useEffect(() => {
     setAnnounce("");
   }, [loc.pathname]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      if (!isAdminUnlocked()) {
+        clearAdminSession();
+        nav("/", { replace: true }); // ✅ 回 admin 站 Gate（同一個 origin）
+      }
+    }, 5_000); // 5 秒檢查一次，踢出更快
+
+    return () => window.clearInterval(id);
+  }, [nav]);
 
   function logout() {
     clearAdminSession();

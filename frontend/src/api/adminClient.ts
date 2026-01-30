@@ -34,12 +34,12 @@ function authHeaders(extra?: Record<string, string>) {
 async function parseError(res: Response): Promise<string> {
   const statusPrefix = `[HTTP ${res.status}] `;
 
-  if (res.status === 401) {
-    return (
-      statusPrefix +
-      "沒有權限：管理驗證失敗，或權杖已失效。請回到「管理入口」重新輸入管理權杖。"
-    );
-  }
+    if (res.status === 401) {
+      return (
+        statusPrefix +
+        "沒有權限：管理驗證失敗或已過期。請回到「管理入口」重新登入。"
+      );
+    }
 
   try {
     const rawText = await res.text();

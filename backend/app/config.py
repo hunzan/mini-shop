@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     database_url: str
     frontend_origin: str
     seed_demo_data: int = 0
+    admin_token_ttl_seconds: int = 3600
 
     enable_email_notify: int = 0
     admin_notify_email: str | None = None

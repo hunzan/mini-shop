@@ -34,48 +34,51 @@ export default function AdminGate() {
 
   if (unlocked) return <Navigate to={next} replace />;
 
-async function submit(e?: React.FormEvent) {
-  e?.preventDefault();
-  setErr("");
+    async function submit(e?: React.FormEvent) {
+      e?.preventDefault();
+      setErr("");
 
-  const password = tokenInput.trim();
-  if (!password) {
-    setErr("請輸入管理密碼。");
-    tokenRef.current?.focus();
-    return;
-  }
+      const password = tokenInput.trim();
+      if (!password) {
+        setErr("請輸入管理密碼。");
+        tokenRef.current?.focus();
+        return;
+      }
 
-  try {
-    const res = await fetch(`${API_BASE}/admin/auth/login`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ password }),
-    });
-
-    if (!res.ok) {
-      // 盡量讀出後端 detail
-      const raw = await res.text();
-      let msg = `登入失敗（HTTP ${res.status}）`;
       try {
-        const data = raw ? JSON.parse(raw) : null;
-        if (data?.detail) msg = String(data.detail);
-      } catch {}
-      throw new Error(msg);
+        const res = await fetch(`${API_BASE}/admin/auth/login`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ password }),
+        });
+
+        if (!res.ok) {
+          const raw = await res.text();
+          let msg = `登入失敗（HTTP ${res.status}）`;
+          try {
+            const data = raw ? JSON.parse(raw) : null;
+            if (data?.detail) msg = String(data.detail);
+          } catch {}
+          throw new Error(msg);
+        }
+
+        const data = (await res.json()) as { token: string; expires_at: string };
+
+        if (!data?.token) throw new Error("伺服器未回傳 token");
+        if (!data?.expires_at) throw new Error("伺服器未回傳 expires_at");
+
+        // ✅ 重要：存 token + expires_at
+        setAdminSession(data.token, data.expires_at);
+
+        nav(next, { replace: true });
+      } catch (err: any) {
+        setErr(err?.message || "登入失敗，請稍後再試。");
+        tokenRef.current?.focus();
+      }
     }
-
-    const data = (await res.json()) as { token: string };
-    if (!data?.token) throw new Error("伺服器未回傳 token");
-
-    setAdminSession(data.token);    // ✅ 存長 token
-    nav(next, { replace: true });   // ✅ 進管理頁
-  } catch (err: any) {
-    setErr(err?.message || "登入失敗，請稍後再試。");
-    tokenRef.current?.focus();
-  }
-}
 
   const describedBy = err ? `${hintId} ${errId}` : hintId;
 
