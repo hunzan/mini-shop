@@ -1,4 +1,5 @@
 // src/api/adminClient.ts
+import { clearAdminSession, getAdminToken } from "../utils/adminSession";
 
 const RAW_BASE =
   import.meta.env.VITE_API_BASE_URL ||
@@ -12,15 +13,11 @@ function joinUrl(base: string, path: string) {
   return `${base}${p}`;
 }
 
-function adminToken() {
-  return sessionStorage.getItem("admin_token") || "";
-}
-
 function jsonHeaders(extra?: Record<string, string>) {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "X-Admin-Token": adminToken(),
+    "X-Admin-Token": getAdminToken(),
     ...(extra || {}),
   };
 }
@@ -29,14 +26,9 @@ function authHeaders(extra?: Record<string, string>) {
   // 上傳用：不要指定 Content-Type，讓瀏覽器自動帶 multipart boundary
   return {
     Accept: "application/json",
-    "X-Admin-Token": adminToken(),
+    "X-Admin-Token": getAdminToken(),
     ...(extra || {}),
   };
-}
-
-function clearAdminSession() {
-  sessionStorage.removeItem("admin_unlocked_v1");
-  sessionStorage.removeItem("admin_token");
 }
 
 async function parseError(res: Response): Promise<string> {
@@ -45,7 +37,7 @@ async function parseError(res: Response): Promise<string> {
   if (res.status === 401) {
     return (
       statusPrefix +
-      "沒有權限：管理驗證失敗，或登入已過期。請回到「管理入口」重新輸入密碼。"
+      "沒有權限：管理驗證失敗，或權杖已失效。請回到「管理入口」重新輸入管理權杖。"
     );
   }
 
@@ -76,9 +68,7 @@ async function parseError(res: Response): Promise<string> {
       }
     }
 
-    return rawText
-      ? `${statusPrefix}${rawText}`
-      : `錯誤代碼：${res.status}`;
+    return rawText ? `${statusPrefix}${rawText}` : `錯誤代碼：${res.status}`;
   } catch {
     return `${statusPrefix}無法解析錯誤訊息`;
   }
@@ -90,7 +80,6 @@ async function ensureOk<T>(res: Response): Promise<T> {
     if (res.status === 401) {
       clearAdminSession();
     }
-
     throw new Error(await parseError(res));
   }
 
@@ -142,16 +131,26 @@ export async function adminPatchJson<T>(path: string, body: unknown): Promise<T>
   return ensureOk<T>(res);
 }
 
-export async function adminPatch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function adminPatch<T>(
+  path: string,
+  init?: RequestInit
+): Promise<T> {
   const url = joinUrl(API_BASE, path);
+
+  // ✅ headers 合併：允許 init 覆蓋一般 header，但 X-Admin-Token 一定要有
+  const mergedHeaders =
+    init?.headers && typeof init.headers === "object"
+      ? {
+          ...authHeaders(),
+          ...(init.headers as Record<string, string>),
+          "X-Admin-Token": getAdminToken(),
+        }
+      : authHeaders();
 
   const res = await fetch(url, {
     method: "PATCH",
     ...init,
-    headers: {
-      ...(init?.headers || {}),
-      ...authHeaders(),
-    },
+    headers: mergedHeaders,
   });
 
   return ensureOk<T>(res);
@@ -163,7 +162,7 @@ export async function adminDelete<T>(path: string): Promise<T> {
   return ensureOk<T>(res);
 }
 
-// ✅ 你之前也缺過：上傳（同時支援 File 或 FormData）
+// ✅ 上傳（同時支援 File 或 FormData）
 export async function adminUploadFile<T>(
   path: string,
   fileOrForm: File | FormData,

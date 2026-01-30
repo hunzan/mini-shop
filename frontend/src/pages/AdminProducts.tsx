@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminGet, adminPost, adminPatchJson, adminDelete, adminUploadFile } from "../api/adminClient";
-import { Navigate, useLocation } from "react-router-dom";
+import { toAbsUrl } from "../api/url";
 
 type ShippingMethod = "post" | "cvs_711" | "cvs_family" | "courier";
 
@@ -37,20 +37,6 @@ function methodLabel(m: ShippingMethod) {
     case "courier":
       return "宅配";
   }
-}
-
-const RAW_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_VITE_API_BASE_URL ||
-  "http://127.0.0.1:8000";
-
-const API_BASE = String(RAW_BASE).replace(/\/+$/, "");
-
-function toAbsUrl(u: string) {
-  if (!u) return "";
-  if (/^https?:\/\//i.test(u)) return u;
-  if (u.startsWith("/")) return `${API_BASE}${u}`;
-  return `${API_BASE}/${u}`;
 }
 
   const STORAGE_KEY = "admin_unlocked_v1";

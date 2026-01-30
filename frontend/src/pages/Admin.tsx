@@ -1,26 +1,25 @@
 // src/pages/Admin.tsx
 import { useEffect, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
-
-import AdminProducts from "./AdminProducts";
-import AdminOrders from "./AdminOrders";
-import AdminCategories from "./AdminCategories";
-
-const STORAGE_KEY = "admin_unlocked_v1";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { clearAdminSession } from "../utils/adminSession";
 
 export default function Admin() {
-
-  const [tab, setTab] = useState<"orders" | "products" | "categories">("orders");
   const [announce, setAnnounce] = useState("");
+  const loc = useLocation();
+  const nav = useNavigate();
 
   useEffect(() => {
-    // 你如果想真的朗讀 tab 切換，也可以 setAnnounce(`已切換到：...`)
     setAnnounce("");
-  }, [tab]);
+  }, [loc.pathname]);
+
+  function logout() {
+    clearAdminSession();
+    // ✅ gate 在 "/"（admin 站），並帶 next 讓你回來方便
+    nav(`/?next=${encodeURIComponent(loc.pathname)}`, { replace: true });
+  }
 
   return (
     <div className="admin-scope">
-      {/* 上方固定：tab 切換 + aria announce */}
       <div style={{ padding: 16 }}>
         <div
           role="status"
@@ -31,59 +30,41 @@ export default function Admin() {
         </div>
 
         <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-          <button
+          <NavLink
             className="btn"
-            type="button"
-            onClick={() => {
-              setTab("orders");
-              setAnnounce("已切換到：訂單");
-            }}
-            aria-pressed={tab === "orders"}
+            to="/orders"
+            onClick={() => setAnnounce("已切換到：訂單")}
+            aria-current={loc.pathname === "/orders" ? "page" : undefined}
           >
             訂單
-          </button>
+          </NavLink>
 
-          <button
+          <NavLink
             className="btn"
-            type="button"
-            onClick={() => {
-              setTab("products");
-              setAnnounce("已切換到：商品");
-            }}
-            aria-pressed={tab === "products"}
+            to="/products"
+            onClick={() => setAnnounce("已切換到：商品")}
+            end={false}
           >
             商品
-          </button>
+          </NavLink>
 
-          <button
+          <NavLink
             className="btn"
-            type="button"
-            onClick={() => {
-              setTab("categories");
-              setAnnounce("已切換到：分類");
-            }}
-            aria-pressed={tab === "categories"}
+            to="/categories"
+            onClick={() => setAnnounce("已切換到：分類")}
+            aria-current={loc.pathname === "/categories" ? "page" : undefined}
           >
             分類
-          </button>
+          </NavLink>
 
-          <button
-            className="btn"
-            type="button"
-            onClick={() => {
-              sessionStorage.removeItem(STORAGE_KEY);
-              window.location.href = "/admin-gate";
-            }}
-          >
+          <button className="btn" type="button" onClick={logout}>
             離開管理模式
           </button>
         </div>
       </div>
 
-      {/* 依 tab 切換畫面（只渲染其中一個） */}
-      {tab === "orders" && <AdminOrders />}
-      {tab === "products" && <AdminProducts />}
-      {tab === "categories" && <AdminCategories />}
+      {/* ✅ 真正內容交給 router */}
+      <Outlet />
     </div>
   );
 }

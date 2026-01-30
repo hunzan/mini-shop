@@ -1,34 +1,22 @@
 import os
+from pathlib import Path
 from pydantic_settings import BaseSettings
 
+BASE_DIR = Path(__file__).resolve().parent.parent  # backend/
+# config.py 在 backend/app/，所以 parent.parent = backend/
 
 def get_env_file() -> str:
-    """
-    決定要讀哪個 env 檔
-    優先順序：
-    1. OS 環境變數 ENV
-    2. 預設 dev
-    """
     env = os.getenv("ENV", "dev").lower()
-    if env == "prod":
-        return ".env.prod"
-    return ".env.dev"
+    filename = ".env.prod" if env == "prod" else ".env.dev"
+    return str(BASE_DIR / filename)
 
 
 class Settings(BaseSettings):
-    # 基本環境
     env: str = "dev"
-
-    # DB
     database_url: str
-
-    # CORS
     frontend_origin: str
+    seed_demo_data: int = 0
 
-    # seed 控制
-    seed_demo_data: int = 0  # 1 / 0
-
-    # notify (email)
     enable_email_notify: int = 0
     admin_notify_email: str | None = None
 
@@ -40,6 +28,7 @@ class Settings(BaseSettings):
     smtp_from_email: str | None = None
 
     admin_token: str | None = None
+    admin_password: str | None = None
 
     class Config:
         env_file = get_env_file()
