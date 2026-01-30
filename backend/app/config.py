@@ -30,6 +30,7 @@ class Settings(BaseSettings):
 
     admin_token: str | None = None
     admin_password: str | None = None
+    upload_dir: str | None = None
 
     class Config:
         env_file = get_env_file()

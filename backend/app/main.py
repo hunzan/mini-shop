@@ -46,7 +46,9 @@ app.add_middleware(
 )
 
 # ✅ 靜態檔：uploads（圖片會放這裡）
-UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads"  # backend/uploads
+UPLOAD_DIR = Path(settings.upload_dir) if settings.upload_dir else (
+    Path(__file__).resolve().parent.parent / "uploads"
+)
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
