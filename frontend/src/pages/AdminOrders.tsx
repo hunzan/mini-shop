@@ -1,6 +1,6 @@
 // src/pages/AdminOrders.tsx
 import { useEffect, useMemo, useState, useRef } from "react";
-
+import AdminNav from "../components/admin/AdminNav";
 import { adminGet, adminPatchJson } from "../api/adminClient"; // ✅ 用你有的函式
 // 如果你 adminClient 真的有 adminPatch（無 body），再改回 adminPatch
 
@@ -127,6 +127,8 @@ export default function AdminOrders() {
   // ...後面你的 return UI 保持原樣即可
 
     return (
+    <div className="admin-scope">
+      <AdminNav />
       <main className="admin-scope" aria-label="訂單管理">
         <div role="status" aria-live="polite" className="sr-only">
           {announce}
@@ -220,5 +222,6 @@ export default function AdminOrders() {
           )}
         </section>
       </main>
+      </div>
     );
   }
