@@ -8,8 +8,8 @@
     "dev:admin": "vite --port 5174 --strictPort",
 
     "build": "tsc -b && vite build",
-    "build:shop": "vite build --outDir dist-shop",
-    "build:admin": "vite build --outDir dist-admin",
+    "build:shop": "tsc -b && vite build --mode shop",
+    "build:admin": "tsc -b && vite build --mode admin && node scripts/rename-admin-html.mjs",
     "preview": "vite preview",
     "preview:shop": "vite preview --port 4173 --strictPort --outDir dist-shop",
     "preview:admin": "vite preview --port 4174 --strictPort --outDir dist-admin"
