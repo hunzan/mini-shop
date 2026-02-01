@@ -2,17 +2,6 @@
 import { clearAdminSession, getAdminToken } from "../utils/adminSession";
 import { API_BASE } from "./base";
 
-const RAW_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_API_BASE ||
-  "";
-
-const API_BASE = String(RAW_BASE).replace(/\/+$/, "");
-
-if (!API_BASE) {
-  throw new Error("API base missing: set VITE_API_BASE_URL or VITE_API_BASE at build time");
-}
-
 function joinUrl(base: string, path: string) {
   const p = path.startsWith("/") ? path : `/${path}`;
   return `${base}${p}`;
