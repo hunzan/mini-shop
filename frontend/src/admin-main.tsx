@@ -52,16 +52,14 @@ const router = createBrowserRouter([
     children: [
       // ✅ 管理區 layout：固定 tab + Outlet
       {
-        element: <Admin />,
+        path: "/admin",
+        element: <AdminGate />,
         children: [
-          // 預設進管理區導到訂單（你可改 products）
-          { path: "/admin", element: <Navigate to="/orders" replace /> },
-
-          { path: "/orders", element: <AdminOrders /> },
-          { path: "/products", element: <AdminProducts /> },
-          { path: "/admin/categories", element: <AdminCategories /> },
+          { path: "categories", element: <AdminCategories /> },
+          { path: "orders", element: <AdminOrders /> },
+          { path: "products", element: <AdminProducts /> },
         ],
-      },
+      }
     ],
   },
 

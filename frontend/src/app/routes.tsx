@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import Layout from "./layout";
 
 import Home from "../pages/Home";
@@ -11,22 +11,31 @@ import CheckoutResult from "../pages/CheckoutResult";
 import Admin from "../pages/Admin";
 import AdminProducts from "../pages/AdminProducts";
 import AdminOrders from "../pages/AdminOrders";
-import AdminGate from "../pages/AdminGate";
-import RequireAdmin from "../components/Admin/RequireAdmin";
 import AdminCategories from "../pages/AdminCategories";
+import AdminGate from "../pages/AdminGate";
 
 const SHOW_ADMIN = import.meta.env.VITE_SHOW_ADMIN === "1";
 
 const adminRoutes = SHOW_ADMIN
   ? [
-      // ✅ 管理入口不包 RequireAdmin
-      { path: "/admin-gate", element: <AdminGate /> },
+      // ✅ 讓 /admin 本身存在，並可導到預設頁（例如 orders）
+      {
+        path: "/admin",
+        element: <AdminGate />,
+        children: [
+          // 進 /admin 時導到預設落點（也可以改 products）
+          { index: true, element: <Navigate to="/admin/orders" replace /> },
 
-      // ✅ 後台路由全部包起來
-      { path: "/admin", element: <RequireAdmin><Admin /></RequireAdmin> },
-      { path: "/admin/products", element: <RequireAdmin><AdminProducts /></RequireAdmin> },
-      { path: "/admin/orders", element: <RequireAdmin><AdminOrders /></RequireAdmin> },
-      { path: "/admin/categories", element: <RequireAdmin><AdminCategories /></RequireAdmin> },
+          // ✅ AdminGate 解鎖後會 render <Outlet />，所以子頁都會被 gate
+          { path: "home", element: <Admin /> },
+          { path: "products", element: <AdminProducts /> },
+          { path: "orders", element: <AdminOrders /> },
+          { path: "categories", element: <AdminCategories /> },
+        ],
+      },
+
+      // （可選）如果你還想保留舊網址 /admin-gate，讓它跳到 /admin
+      { path: "/admin-gate", element: <Navigate to="/admin" replace /> },
     ]
   : [];
 

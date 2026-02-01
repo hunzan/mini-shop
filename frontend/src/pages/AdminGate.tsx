@@ -1,10 +1,10 @@
 // src/pages/AdminGate.tsx
 import { useEffect, useId, useRef, useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { isAdminUnlocked, setAdminSession } from "../utils/adminSession";
 import { API_BASE } from "../api/base";
 
-const shopUrl = import.meta.env.VITE_SHOP_URL || "http://localhost:5173";
+const shopUrl = import.meta.env.VITE_SHOP_URL || "";
 
 export default function AdminGate() {
   const nav = useNavigate();
@@ -20,13 +20,13 @@ export default function AdminGate() {
   const unlocked = isAdminUnlocked();
 
   // ✅ admin 站內預設落點：改成你想的（/orders 或 /products）
-  const next = new URLSearchParams(loc.search).get("next") || "/orders";
+  const next =
+    new URLSearchParams(loc.search).get("next") || "/admin/orders";
 
   useEffect(() => {
     tokenRef.current?.focus();
   }, []);
 
-  if (unlocked) return <Navigate to={next} replace />;
 
     async function submit(e?: React.FormEvent) {
       e?.preventDefault();
@@ -75,6 +75,20 @@ export default function AdminGate() {
     }
 
   const describedBy = err ? `${hintId} ${errId}` : hintId;
+
+  const atAdminRoot =
+    loc.pathname === "/admin" || loc.pathname === "/admin/";
+
+  if (unlocked) {
+    // 已解鎖：
+    // - 在 /admin 根目錄 → 導到預設 admin 頁
+    // - 在 /admin/xxx → 直接顯示子頁
+    return atAdminRoot ? (
+      <Navigate to={next} replace />
+    ) : (
+      <Outlet />
+    );
+  }
 
   return (
     <section className="card gate" aria-labelledby="gate-title">
