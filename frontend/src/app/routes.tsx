@@ -15,6 +15,21 @@ import AdminGate from "../pages/AdminGate";
 import RequireAdmin from "../components/Admin/RequireAdmin";
 import AdminCategories from "../pages/AdminCategories";
 
+const SHOW_ADMIN = import.meta.env.VITE_SHOW_ADMIN === "1";
+
+const adminRoutes = SHOW_ADMIN
+  ? [
+      // ✅ 管理入口不包 RequireAdmin
+      { path: "/admin-gate", element: <AdminGate /> },
+
+      // ✅ 後台路由全部包起來
+      { path: "/admin", element: <RequireAdmin><Admin /></RequireAdmin> },
+      { path: "/admin/products", element: <RequireAdmin><AdminProducts /></RequireAdmin> },
+      { path: "/admin/orders", element: <RequireAdmin><AdminOrders /></RequireAdmin> },
+      { path: "/admin/categories", element: <RequireAdmin><AdminCategories /></RequireAdmin> },
+    ]
+  : [];
+
 export const router = createBrowserRouter([
   {
     element: <Layout />,
@@ -26,14 +41,7 @@ export const router = createBrowserRouter([
       { path: "/checkout", element: <Checkout /> },
       { path: "/checkout/result", element: <CheckoutResult /> },
 
-      // ✅ 管理入口不包 RequireAdmin
-      { path: "/admin-gate", element: <AdminGate /> },
-
-      // ✅ 後台路由全部包起來
-      { path: "/admin", element: <RequireAdmin><Admin /></RequireAdmin> },
-      { path: "/admin/products", element: <RequireAdmin><AdminProducts /></RequireAdmin> },
-      { path: "/admin/orders", element: <RequireAdmin><AdminOrders /></RequireAdmin> },
-      { path: "/admin/categories", element: <RequireAdmin><AdminCategories /></RequireAdmin> },
+      ...adminRoutes,
     ],
   },
 ]);
