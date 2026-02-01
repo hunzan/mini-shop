@@ -8,8 +8,8 @@
     "dev:admin": "vite --port 5174 --strictPort",
 
     "build": "tsc -b && vite build",
-    "build:shop": "tsc -b && vite build --mode shop",
-    "build:admin": "tsc -b && vite build --mode admin && node scripts/rename-admin-html.mjs",
+    "build:shop": "echo VITE_API_BASE_URL=$VITE_API_BASE_URL && echo VITE_API_BASE=$VITE_API_BASE && npm run _build_shop",
+    "build:admin": "echo VITE_API_BASE_URL=$VITE_API_BASE_URL && echo VITE_API_BASE=$VITE_API_BASE && echo VITE_SHOP_URL=$VITE_SHOP_URL && npm run _build_admin",
 
     "preview": "vite preview",
     "preview:shop": "vite preview --port 4173 --strictPort --outDir dist-shop",
