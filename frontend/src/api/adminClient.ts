@@ -3,8 +3,16 @@ import { clearAdminSession, getAdminToken } from "../utils/adminSession";
 
 const RAW_BASE =
   import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_API_BASE ||
-  "http://localhost:8000";
+  import.meta.env.VITE_API_BASE;
+
+if (!RAW_BASE) {
+  if (import.meta.env.PROD) {
+    throw new Error("VITE_API_BASE_URL is not set in production build");
+  }
+}
+
+const API_BASE = (RAW_BASE || "http://localhost:8000").replace(/\/+$/, "");
+
 
 const API_BASE = String(RAW_BASE).replace(/\/+$/, "");
 
