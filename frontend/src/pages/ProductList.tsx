@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { apiGet } from "../api/client";
 import type { Product } from "../types/product";
 import { useCartStore } from "../store/cartStore";
-import { API_BASE } from "../api/client";
+import { API_BASE } from "../api/base";
 import { Link } from "react-router-dom";
 
 function stripHtml(s: string) {

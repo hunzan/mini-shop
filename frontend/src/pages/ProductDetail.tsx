@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { apiGet, API_BASE } from "../api/client";
+import { apiGet } from "../api/client";
+import { API_BASE } from "../api/base";
 import type { Product } from "../types/product";
 import { useCartStore } from "../store/cartStore";
 import DOMPurify from "dompurify";
