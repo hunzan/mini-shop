@@ -1,4 +1,8 @@
 // src/api/url.ts
+import { getRuntimeConfig } from "../config/runtime";
+
+const runtime = getRuntimeConfig();
+
 const RAW_BASE =
   import.meta.env.VITE_API_BASE_URL ||
   import.meta.env.VITE_API_BASE ||
