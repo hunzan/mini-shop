@@ -1,4 +1,6 @@
 // src/api/client.ts
+console.log("[API_BASE RAW]", import.meta.env.VITE_API_BASE_URL, import.meta.env.VITE_API_BASE);
+
 const RAW_BASE =
   import.meta.env.VITE_API_BASE_URL ||
   import.meta.env.VITE_API_BASE ||

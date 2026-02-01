@@ -1,12 +1,6 @@
 // src/api/adminClient.ts
 import { clearAdminSession, getAdminToken } from "../utils/adminSession";
 
-console.log("[env]", {
-  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
-  VITE_API_BASE: import.meta.env.VITE_API_BASE,
-  MODE: import.meta.env.MODE,
-});
-
 const RAW_BASE =
   import.meta.env.VITE_API_BASE_URL ||
   import.meta.env.VITE_API_BASE ||
