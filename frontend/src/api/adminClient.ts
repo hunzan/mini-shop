@@ -1,8 +1,5 @@
 // src/api/adminClient.ts
 import { clearAdminSession, getAdminToken } from "../utils/adminSession";
-import { getRuntimeConfig } from "../config/runtime";
-
-const runtime = getRuntimeConfig();
 
 const RAW_BASE =
   import.meta.env.VITE_API_BASE_URL ||

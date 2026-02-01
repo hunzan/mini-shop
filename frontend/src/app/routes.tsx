@@ -14,13 +14,8 @@ import AdminOrders from "../pages/AdminOrders";
 import AdminGate from "../pages/AdminGate";
 import RequireAdmin from "../components/Admin/RequireAdmin";
 import AdminCategories from "../pages/AdminCategories";
-import { getRuntimeConfig } from "../config/runtime";
 
-const runtime = getRuntimeConfig();
-
-const SHOW_ADMIN =
-  runtime.SHOW_ADMIN === "1" ||
-  import.meta.env.VITE_SHOW_ADMIN === "1";
+const SHOW_ADMIN = import.meta.env.VITE_SHOW_ADMIN === "1";
 
 const adminRoutes = SHOW_ADMIN
   ? [
