@@ -1,18 +1,16 @@
 // src/api/adminClient.ts
 import { clearAdminSession, getAdminToken } from "../utils/adminSession";
 
+console.log("[env]", {
+  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  VITE_API_BASE: import.meta.env.VITE_API_BASE,
+  MODE: import.meta.env.MODE,
+});
+
 const RAW_BASE =
   import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_API_BASE;
-
-if (!RAW_BASE) {
-  if (import.meta.env.PROD) {
-    throw new Error("VITE_API_BASE_URL is not set in production build");
-  }
-}
-
-const API_BASE = (RAW_BASE || "http://localhost:8000").replace(/\/+$/, "");
-
+  import.meta.env.VITE_API_BASE ||
+  "http://localhost:8000";
 
 const API_BASE = String(RAW_BASE).replace(/\/+$/, "");
 
