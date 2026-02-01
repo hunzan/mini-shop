@@ -1,4 +1,6 @@
 // src/api/client.ts
+console.log("[BUILD_ID]", "SHOP_" + new Date().toISOString());
+
 const RAW_BASE =
   import.meta.env.VITE_API_BASE_URL ||
   import.meta.env.VITE_API_BASE ||
