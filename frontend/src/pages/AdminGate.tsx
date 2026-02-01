@@ -80,14 +80,7 @@ export default function AdminGate() {
     loc.pathname === "/admin" || loc.pathname === "/admin/";
 
   if (unlocked) {
-    // 已解鎖：
-    // - 在 /admin 根目錄 → 導到預設 admin 頁
-    // - 在 /admin/xxx → 直接顯示子頁
-    return atAdminRoot ? (
-      <Navigate to={next} replace />
-    ) : (
-      <Outlet />
-    );
+    return atAdminRoot ? <Navigate to={next} replace /> : <Outlet />;
   }
 
   return (

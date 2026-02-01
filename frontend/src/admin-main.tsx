@@ -25,45 +25,29 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminCategories from "./pages/AdminCategories";
 import AdminOrders from "./pages/AdminOrders";
 
-// ----------------------
-// RequireAdmin（保護 admin routes）
-// ----------------------
-function RequireAdmin() {
-  const loc = useLocation();
-
-  if (!isAdminUnlocked()) {
-    const next = `${loc.pathname}${loc.search}${loc.hash}`;
-    return <Navigate to={`/?next=${encodeURIComponent(next)}`} replace />;
-  }
-
-  return <Outlet />;
-}
-
-// ----------------------
-// Router（admin 站）
-// ----------------------
 const router = createBrowserRouter([
-  // ✅ 入口：Gate
+  // 入口：admin 站 Gate（你想留 "/" 當 gate 就留）
   { path: "/", element: <AdminGate /> },
 
-  // ✅ 受保護的 admin 區
+  // /admin 區：先 gate，再進 layout，再進各頁
   {
-    element: <RequireAdmin />,
+    path: "/admin",
+    element: <AdminGate />, // ✅ 守門：未解鎖顯示表單；已解鎖 <Outlet/>
     children: [
-      // ✅ 管理區 layout：固定 tab + Outlet
       {
-        path: "/admin",
-        element: <AdminGate />,
+        element: <Admin />,   // ✅ 這裡就是你的按鈕列 + <Outlet/>
         children: [
+          // /admin 預設落點（登入後/直接進 /admin）
+          { index: true, element: <Navigate to="categories" replace /> },
+
           { path: "categories", element: <AdminCategories /> },
           { path: "orders", element: <AdminOrders /> },
           { path: "products", element: <AdminProducts /> },
         ],
-      }
+      },
     ],
   },
 
-  // fallback
   { path: "*", element: <Navigate to="/" replace /> },
 ]);
 
