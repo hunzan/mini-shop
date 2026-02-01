@@ -44,16 +44,16 @@ export default function Admin() {
         <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
           <NavLink
             className="btn"
-            to="/orders"
+            to="/admin/orders"
             onClick={() => setAnnounce("已切換到：訂單")}
-            aria-current={loc.pathname === "/orders" ? "page" : undefined}
+            aria-current={loc.pathname === "/admin/orders" ? "page" : undefined}
           >
             訂單
           </NavLink>
 
           <NavLink
             className="btn"
-            to="/products"
+            to="/admin/products"
             onClick={() => setAnnounce("已切換到：商品")}
             end={false}
           >
@@ -62,9 +62,9 @@ export default function Admin() {
 
           <NavLink
             className="btn"
-            to="/categories"
+            to="/admin/categories"
             onClick={() => setAnnounce("已切換到：分類")}
-            aria-current={loc.pathname === "/categories" ? "page" : undefined}
+            aria-current={loc.pathname === "/admin/categories"? "page" : undefined}
           >
             分類
           </NavLink>

@@ -91,7 +91,7 @@ export default function AdminProducts() {
     try {
       const [plist, clist] = await Promise.all([
         adminGet<AdminProduct[]>("/admin/products"),
-        adminGet<Category[]>("/categories"),
+        adminGet<Category[]>("/admin/categories"),
       ]);
       setList(plist);
       setCategories(clist);

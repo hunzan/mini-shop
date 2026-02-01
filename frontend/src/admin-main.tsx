@@ -59,7 +59,7 @@ const router = createBrowserRouter([
 
           { path: "/orders", element: <AdminOrders /> },
           { path: "/products", element: <AdminProducts /> },
-          { path: "/categories", element: <AdminCategories /> },
+          { path: "/admin/categories", element: <AdminCategories /> },
         ],
       },
     ],
