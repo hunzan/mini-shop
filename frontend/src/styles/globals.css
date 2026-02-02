@@ -1284,3 +1284,8 @@ h1.product-title{
     padding: 1px 6px;
   }
 }
+.btn {
+  display: inline-flex;
+  align-items: center;      /* 垂直置中 */
+  justify-content: center;  /* 水平置中 */
+}

@@ -26,8 +26,7 @@ export default function Admin() {
 
   function logout() {
     clearAdminSession();
-    // ✅ gate 在 "/"（admin 站），並帶 next 讓你回來方便
-    nav(`/admin?next=${encodeURIComponent(loc.pathname)}`, { replace: true });
+    nav("/admin", { replace: true });
   }
 
   return (
