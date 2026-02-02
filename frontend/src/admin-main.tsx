@@ -26,32 +26,18 @@ import AdminCategories from "./pages/AdminCategories";
 import AdminOrders from "./pages/AdminOrders";
 
 const router = createBrowserRouter([
-  // ✅ 保留 "/"：避免某些環境實際載入在 "/" 時白屏
   { path: "/", element: <AdminGate /> },
-
-  // ✅ 真正的 admin 區域
   {
-    path: "/admin",
-    element: <AdminGate />, // 未解鎖顯示表單；已解鎖 <Outlet/>
+    path: "/orders",
+    element: <Admin />,
     children: [
-      {
-        element: <Admin />, // 按鈕列 + <Outlet/>
-        children: [
-          // ✅ /admin 預設落點：訂單
-          { index: true, element: <Navigate to="orders" replace /> },
-
-          { path: "orders", element: <AdminOrders /> },
-          { path: "products", element: <AdminProducts /> },
-          { path: "categories", element: <AdminCategories /> },
-        ],
-      },
+      { index: true, element: <AdminOrders /> },
     ],
   },
-
-  // ✅ 其它路徑全部導回 /admin（不要導 "/"）
-  { path: "*", element: <Navigate to="/admin" replace /> },
+  { path: "/products", element: <Admin /><* children... */ },
+  { path: "/categories", element: <Admin /><* children... */ },
+  { path: "*", element: <Navigate to="/" replace /> },
 ]);
-
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
