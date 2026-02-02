@@ -11,15 +11,20 @@ import {
 
 import "./styles/globals.css";
 
+// ✅ 管理入口（輸入 token）
 import AdminGate from "./pages/AdminGate";
+
+// ✅ admin session 判斷
+import { isAdminUnlocked } from "./utils/adminSession";
+
+// ✅ Admin layout（上方 tab + Outlet）
 import Admin from "./pages/Admin";
+
+// ✅ admin pages
 import AdminProducts from "./pages/AdminProducts";
 import AdminCategories from "./pages/AdminCategories";
 import AdminOrders from "./pages/AdminOrders";
 
-import { isAdminUnlocked } from "./utils/adminSession";
-
-// ✅ 只在 admin app 內使用的 guard
 function RequireAdmin() {
   const loc = useLocation();
   if (!isAdminUnlocked()) {
@@ -30,10 +35,12 @@ function RequireAdmin() {
 }
 
 const router = createBrowserRouter([
+  // ✅ admin domain 的根：Gate（輸入密碼）
   { path: "/", element: <AdminGate /> },
 
+  // ✅ 管理區：一定要先過 RequireAdmin，再進 Admin layout
   {
-    path: "/admin",
+    path: "/app",
     element: <RequireAdmin />,
     children: [
       {
@@ -48,11 +55,11 @@ const router = createBrowserRouter([
     ],
   },
 
-  // 兼容舊路徑
-  { path: "/orders", element: <Navigate to="/admin/orders" replace /> },
-  { path: "/products", element: <Navigate to="/admin/products" replace /> },
-  { path: "/categories", element: <Navigate to="/admin/categories" replace /> },
+  // ✅ 兼容：如果有人直接打舊路徑，就導到 /app
+  { path: "/admin", element: <Navigate to="/app" replace /> },
+  { path: "/admin/*", element: <Navigate to="/app" replace /> },
 
+  // fallback
   { path: "*", element: <Navigate to="/" replace /> },
 ]);
 

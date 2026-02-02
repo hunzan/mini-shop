@@ -22,9 +22,9 @@ export default function AdminGate() {
     // ✅ admin 站內預設落點：改成你想的（/orders 或 /products）
   const rawNext = new URLSearchParams(loc.search).get("next");
   const next =
-    rawNext && rawNext.startsWith("/admin")
+    rawNext && rawNext.startsWith("/app")
       ? rawNext
-      : "/admin/orders";
+      : "/app/orders";
 
   useEffect(() => {
     tokenRef.current?.focus();

@@ -17,7 +17,7 @@ export default function Admin() {
     const id = window.setInterval(() => {
       if (!isAdminUnlocked()) {
         clearAdminSession();
-        window.location.replace("/admin"); // ✅ 回到 admin gate（線上入口）
+        window.location.replace("/"); // ✅ 回到 admin gate（線上入口）
       }
     }, 5_000); // 5 秒檢查一次，踢出更快
 
@@ -26,7 +26,7 @@ export default function Admin() {
 
   function logout() {
     clearAdminSession();
-    window.location.replace("/admin"); // ✅ 強制回 gate 並重載
+    window.location.replace("/"); // ✅ 強制回 gate 並重載
   }
 
   return (
@@ -43,16 +43,16 @@ export default function Admin() {
         <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
           <NavLink
             className="btn"
-            to="/admin/orders"
+            to="/app/orders"
             onClick={() => setAnnounce("已切換到：訂單")}
-            aria-current={loc.pathname === "/admin/orders" ? "page" : undefined}
+            aria-current={loc.pathname === "/app/orders" ? "page" : undefined}
           >
             訂單
           </NavLink>
 
           <NavLink
             className="btn"
-            to="/admin/products"
+            to="/app/products"
             onClick={() => setAnnounce("已切換到：商品")}
             end={false}
           >
@@ -61,9 +61,9 @@ export default function Admin() {
 
           <NavLink
             className="btn"
-            to="/admin/categories"
+            to="/app/categories"
             onClick={() => setAnnounce("已切換到：分類")}
-            aria-current={loc.pathname === "/admin/categories"? "page" : undefined}
+            aria-current={loc.pathname === "/app/categories"? "page" : undefined}
           >
             分類
           </NavLink>
