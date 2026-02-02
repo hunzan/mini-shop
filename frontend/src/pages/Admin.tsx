@@ -17,7 +17,7 @@ export default function Admin() {
     const id = window.setInterval(() => {
       if (!isAdminUnlocked()) {
         clearAdminSession();
-        nav("/admin-gate", { replace: true });
+        nav("/", { replace: true }); // ✅ 回 admin 站 Gate（同一個 origin）
       }
     }, 5_000); // 5 秒檢查一次，踢出更快
 
@@ -27,7 +27,7 @@ export default function Admin() {
   function logout() {
     clearAdminSession();
     // ✅ gate 在 "/"（admin 站），並帶 next 讓你回來方便
-    nav(`/admin-gate?next=${encodeURIComponent(loc.pathname)}`, { replace: true });
+    nav(`/admin?next=${encodeURIComponent(loc.pathname)}`, { replace: true });
   }
 
   return (
