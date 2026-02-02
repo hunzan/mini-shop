@@ -19,9 +19,12 @@ export default function AdminGate() {
 
   const unlocked = isAdminUnlocked();
 
-  // ✅ admin 站內預設落點：改成你想的（/orders 或 /products）
+    // ✅ admin 站內預設落點：改成你想的（/orders 或 /products）
+  const rawNext = new URLSearchParams(loc.search).get("next");
   const next =
-    new URLSearchParams(loc.search).get("next") || "/admin/orders";
+    rawNext && rawNext.startsWith("/admin")
+      ? rawNext
+      : "/admin/orders"; // 或你要的預設落點
 
   useEffect(() => {
     tokenRef.current?.focus();
