@@ -6,9 +6,10 @@ from fastapi.staticfiles import StaticFiles
 
 from .config import settings
 from .db import Base, engine, SessionLocal
-from .routers import products, orders, admin, categories, admin_products, admin_categories, admin_auth
+from .routers import products, orders, admin, categories, admin_products, admin_categories, admin_auth, admin_uploads
 from .seed import seed_products
 from .models.order_item import OrderItem  # noqa: F401
+
 
 app = FastAPI()
 
@@ -67,6 +68,7 @@ app.include_router(products.router)
 app.include_router(orders.router)
 app.include_router(admin.router)
 app.include_router(admin_auth.router)
+app.include_router(admin_uploads.router)
 
 
 @app.get("/health", tags=["health"])

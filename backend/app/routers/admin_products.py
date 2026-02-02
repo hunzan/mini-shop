@@ -1,19 +1,18 @@
-from fastapi import APIRouter, Depends, Header, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from ..db import get_db
-from ..config import settings
+from ..deps import require_admin
 from ..models.product import Product
 from ..models.category import Category
 from ..models.product_shipping_option import ProductShippingOption
 from ..models.order_item import OrderItem
-from ..deps import require_admin
-from ..schemas.admin_product import AdminProductCreate, AdminProductUpdate, AdminProductOut, AdminProductActiveUpdate
-import uuid
-from pathlib import Path
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from ..deps import require_admin_key
-
+from ..schemas.admin_product import (
+    AdminProductCreate,
+    AdminProductUpdate,
+    AdminProductOut,
+    AdminProductActiveUpdate,
+)
 
 router = APIRouter(prefix="/admin/products", tags=["admin-products"])
 
@@ -35,11 +34,6 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
     db.delete(p)          # shipping_options 會因 relationship cascade 一起刪（你已設 cascade）
     db.commit()
     return {"ok": True, "deleted_product_id": product_id}
-
-
-def require_admin(x_admin_token: str | None = Header(default=None)):
-    if not x_admin_token or x_admin_token != settings.admin_token:
-        raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 def _validate_category(db: Session, category_id: int | None):
@@ -65,40 +59,6 @@ def list_products(db: Session = Depends(get_db)):
     return rows
 
 
-@router.post("", response_model=AdminProductOut, dependencies=[Depends(require_admin)])
-def create_product(payload: AdminProductCreate, db: Session = Depends(get_db)):
-    _validate_category(db, payload.category_id)
-    _validate_shipping_options([o.model_dump() for o in payload.shipping_options])
-
-    p = Product(
-        name=payload.name,
-        category_id=payload.category_id,
-        stock_qty=payload.stock_qty,
-        price=payload.price,
-        description=payload.description,
-        description_text=payload.description_text,
-        image_url=payload.image_url,
-        is_active=payload.is_active,
-    )
-    db.add(p)
-    db.flush()  # 拿到 p.id
-
-    # ✅ 寄送方式 / 運費
-    for o in payload.shipping_options:
-        db.add(
-            ProductShippingOption(
-                product_id=p.id,
-                method=o.method,
-                fee=o.fee,
-                region_note=o.region_note or "",
-            )
-        )
-
-    db.commit()
-    db.refresh(p)
-    return p
-
-
 @router.patch("/{product_id}/active", response_model=AdminProductOut, dependencies=[Depends(require_admin)])
 def set_product_active(product_id: int, payload: AdminProductActiveUpdate, db: Session = Depends(get_db)):
     p = db.query(Product).filter(Product.id == product_id).first()
@@ -116,12 +76,6 @@ def update_product(product_id: int, payload: AdminProductUpdate, db: Session = D
     p = db.query(Product).filter(Product.id == product_id).first()
     if not p:
         raise HTTPException(status_code=404, detail="Product not found")
-
-    # category
-    if payload.category_id is not None or payload.category_id is None:
-        # 這裡的語意是：payload 有帶 category_id 才會更新
-        # 但 Pydantic 會把沒帶的 field 也變成 None，因此用 model_dump(exclude_unset=True) 判斷最準
-        pass
 
     data = payload.model_dump(exclude_unset=True)
 
@@ -158,43 +112,6 @@ def update_product(product_id: int, payload: AdminProductUpdate, db: Session = D
                 )
             )
 
-    db.commit()
-    db.refresh(p)
-    return p
-
-@router.post("/{product_id}/image", response_model=AdminProductOut, dependencies=[Depends(require_admin)])
-async def upload_product_image(
-    product_id: int,
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-):
-    p = db.query(Product).filter(Product.id == product_id).first()
-    if not p:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    # 基本檢查：type / 副檔名
-    ct = (file.content_type or "").lower()
-    if ct not in {"image/jpeg", "image/png", "image/webp"}:
-        raise HTTPException(status_code=400, detail="Only jpg/png/webp allowed")
-
-    ext_map = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
-    ext = ext_map.get(ct, "")
-
-    # ✅ 存檔位置：backend/uploads/products/<product_id>/
-    base_dir = Path(__file__).resolve().parent.parent.parent / "uploads" / "products" / str(product_id)
-    base_dir.mkdir(parents=True, exist_ok=True)
-
-    filename = f"{uuid.uuid4().hex}{ext}"
-    save_path = base_dir / filename
-
-    # 存檔（簡單版本：一次讀完；之後要做大檔再改 chunk）
-    data = await file.read()
-    if len(data) > 5 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="File too large (max 5MB)")
-    save_path.write_bytes(data)
-
-    # ✅ 回填 image_url（用相對路徑，前端可用 API_BASE 拼起來）
-    p.image_url = f"/uploads/products/{product_id}/{filename}"
     db.commit()
     db.refresh(p)
     return p
