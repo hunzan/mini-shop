@@ -17,7 +17,7 @@ export default function Admin() {
     const id = window.setInterval(() => {
       if (!isAdminUnlocked()) {
         clearAdminSession();
-        nav("/admin", { replace: true }); // ✅ 回到 admin gate（線上入口）
+        window.location.replace("/admin"); // ✅ 回到 admin gate（線上入口）
       }
     }, 5_000); // 5 秒檢查一次，踢出更快
 
@@ -26,7 +26,7 @@ export default function Admin() {
 
   function logout() {
     clearAdminSession();
-    nav("/admin", { replace: true });
+    window.location.replace("/admin"); // ✅ 強制回 gate 並重載
   }
 
   return (
