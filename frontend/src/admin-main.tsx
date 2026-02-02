@@ -30,21 +30,16 @@ function RequireAdmin() {
 }
 
 const router = createBrowserRouter([
-  // ✅ Gate：登入頁（admin domain 的根）
   { path: "/", element: <AdminGate /> },
 
-  // ✅ 受保護的 admin 區：一定要先過 RequireAdmin
   {
     path: "/admin",
     element: <RequireAdmin />,
     children: [
-      // ✅ Admin layout：上方按鈕列 + Outlet
       {
         element: <Admin />,
         children: [
-          // /admin 預設落點
           { index: true, element: <Navigate to="orders" replace /> },
-
           { path: "orders", element: <AdminOrders /> },
           { path: "products", element: <AdminProducts /> },
           { path: "categories", element: <AdminCategories /> },
@@ -53,12 +48,11 @@ const router = createBrowserRouter([
     ],
   },
 
-  // ✅ 兼容：如果有人直接打 /orders，就導到 /admin/orders
+  // 兼容舊路徑
   { path: "/orders", element: <Navigate to="/admin/orders" replace /> },
   { path: "/products", element: <Navigate to="/admin/products" replace /> },
   { path: "/categories", element: <Navigate to="/admin/categories" replace /> },
 
-  // fallback
   { path: "*", element: <Navigate to="/" replace /> },
 ]);
 
