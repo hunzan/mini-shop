@@ -240,30 +240,45 @@ export default function AdminProducts() {
     );
   }
 
-  async function uploadImage(productId: number, file: File) {
-    setUploadErr("");
-    setUploadingId(productId);
-    try {
-      const updated = await adminUploadFile<AdminProduct>(`/admin/products/${productId}/image`, file);
+    async function uploadImage(productId: number, file: File) {
+      setUploadErr("");
+      setUploadingId(productId);
 
-      setList((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+      try {
+        // 1) 先上傳到通用 uploads（方案 A）
+        const up = await adminUploadFile<{ filename: string; url: string }>(
+          "/admin/uploads/image",
+          file
+        );
 
-      setPreviewMap((prev) => {
-        const next = { ...prev };
-        const url = next[productId];
-        if (url) URL.revokeObjectURL(url);
-        delete next[productId];
-        return next;
-      });
+        if (!up?.url) throw new Error("上傳成功但未取得圖片 URL");
 
-      setOk(`已更新商品圖片：${updated.name}`);
-      window.setTimeout(() => setOk(""), 2500);
-    } catch (e: any) {
-      setUploadErr(e?.message || String(e));
-    } finally {
-      setUploadingId(null);
+        // 2) 把 image_url PATCH 回商品
+        const updated = await adminPatchJson<AdminProduct>(
+          `/admin/products/${productId}`,
+          { image_url: up.url }
+        );
+
+        // 3) 更新列表
+        setList((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+
+        // 4) 清掉本地 preview
+        setPreviewMap((prev) => {
+          const next = { ...prev };
+          const url = next[productId];
+          if (url) URL.revokeObjectURL(url);
+          delete next[productId];
+          return next;
+        });
+
+        setOk(`已更新商品圖片：${updated.name}`);
+        window.setTimeout(() => setOk(""), 2500);
+      } catch (e: any) {
+        setUploadErr(e?.message || String(e));
+      } finally {
+        setUploadingId(null);
+      }
     }
-  }
 
   async function toggleActive(p: AdminProduct) {
     try {
