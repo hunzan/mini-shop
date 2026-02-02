@@ -11,31 +11,54 @@ import {
 
 import "./styles/globals.css";
 
-// ✅ 管理入口（輸入 token）
 import AdminGate from "./pages/AdminGate";
-
-// ✅ admin session 判斷
-import { isAdminUnlocked } from "./utils/adminSession";
-
-// ✅ Admin layout（上方 tab + Outlet）
 import Admin from "./pages/Admin";
-
-// ✅ admin pages
 import AdminProducts from "./pages/AdminProducts";
 import AdminCategories from "./pages/AdminCategories";
 import AdminOrders from "./pages/AdminOrders";
 
+import { isAdminUnlocked } from "./utils/adminSession";
+
+// ✅ 只在 admin app 內使用的 guard
+function RequireAdmin() {
+  const loc = useLocation();
+  if (!isAdminUnlocked()) {
+    const next = encodeURIComponent(loc.pathname + loc.search + loc.hash);
+    return <Navigate to={`/?next=${next}`} replace />;
+  }
+  return <Outlet />;
+}
+
 const router = createBrowserRouter([
+  // ✅ Gate：登入頁（admin domain 的根）
   { path: "/", element: <AdminGate /> },
+
+  // ✅ 受保護的 admin 區：一定要先過 RequireAdmin
   {
-    path: "/orders",
-    element: <Admin />,
+    path: "/admin",
+    element: <RequireAdmin />,
     children: [
-      { index: true, element: <AdminOrders /> },
+      // ✅ Admin layout：上方按鈕列 + Outlet
+      {
+        element: <Admin />,
+        children: [
+          // /admin 預設落點
+          { index: true, element: <Navigate to="orders" replace /> },
+
+          { path: "orders", element: <AdminOrders /> },
+          { path: "products", element: <AdminProducts /> },
+          { path: "categories", element: <AdminCategories /> },
+        ],
+      },
     ],
   },
-  { path: "/products", element: <Admin /><* children... */ },
-  { path: "/categories", element: <Admin /><* children... */ },
+
+  // ✅ 兼容：如果有人直接打 /orders，就導到 /admin/orders
+  { path: "/orders", element: <Navigate to="/admin/orders" replace /> },
+  { path: "/products", element: <Navigate to="/admin/products" replace /> },
+  { path: "/categories", element: <Navigate to="/admin/categories" replace /> },
+
+  // fallback
   { path: "*", element: <Navigate to="/" replace /> },
 ]);
 
