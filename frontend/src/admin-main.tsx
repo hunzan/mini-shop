@@ -38,7 +38,7 @@ const router = createBrowserRouter([
         element: <Admin />,   // ✅ 這裡就是你的按鈕列 + <Outlet/>
         children: [
           // /admin 預設落點（登入後/直接進 /admin）
-          { index: true, element: <Navigate to="orders" replace /> },
+          { index: true, element: <Navigate to="/" replace /> },
 
           { path: "categories", element: <AdminCategories /> },
           { path: "orders", element: <AdminOrders /> },

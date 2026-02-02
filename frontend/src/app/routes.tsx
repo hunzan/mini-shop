@@ -24,7 +24,7 @@ const adminRoutes = SHOW_ADMIN
         element: <AdminGate />,
         children: [
           // 進 /admin 時導到預設落點（也可以改 products）
-          { index: true, element: <Navigate to="/admin/orders" replace /> },
+          { index: true, element: <Navigate to="/admin/home" replace /> },
 
           // ✅ AdminGate 解鎖後會 render <Outlet />，所以子頁都會被 gate
           { path: "home", element: <Admin /> },
