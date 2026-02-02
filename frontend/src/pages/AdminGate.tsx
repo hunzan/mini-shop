@@ -24,7 +24,7 @@ export default function AdminGate() {
   const next =
     rawNext && rawNext.startsWith("/admin")
       ? rawNext
-      : "/admin/orders"; // 或你要的預設落點
+      : "/admin/orders";
 
   useEffect(() => {
     tokenRef.current?.focus();
