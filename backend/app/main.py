@@ -119,3 +119,24 @@ def debug_admin_auth():
         "env_file": str(
             (Path(__file__).resolve().parent.parent) / (".env.prod" if settings.env == "prod" else ".env.dev")),
     }
+
+@app.get("/debug/volume")
+def debug_volume():
+    data_dir = Path("/data")
+    probe = data_dir / "_rw_test"
+
+    result = {
+        "data_exists": data_dir.exists(),
+        "data_is_dir": data_dir.is_dir(),
+    }
+
+    try:
+        data_dir.mkdir(parents=True, exist_ok=True)
+        probe.write_text("ok", encoding="utf-8")
+        result["write_ok"] = True
+    except Exception as e:
+        result["write_ok"] = False
+        result["write_error"] = repr(e)
+
+    result["probe_exists"] = probe.exists()
+    return result
