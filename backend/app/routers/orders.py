@@ -58,7 +58,7 @@ def create_order(
 
     elif is_cvs:
         # cvs 必填：門市名稱（你前端是 cvs_store_name）
-        store_name = _require(payload.cvs_store_name)
+        store_name = _require(payload.cvs_store_name, "cvs_store_name")
 
         # 可選：store_id
         store_id = _s(payload.cvs_store_id)
