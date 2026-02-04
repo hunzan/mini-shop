@@ -1,0 +1,14 @@
+﻿{
+  "customer_name": "Test",
+  "customer_email": "test@example.com",
+  "customer_phone": "0912345678",
+  "shipping_method": "cvs_711",
+  "shipping_address": "台北市",
+  "recipient_name": "Test",
+  "recipient_phone": "0912345678",
+  "cvs_store_name": "7-11 測試店",
+  "cvs_store_id": "12345",
+  "items": [
+    { "product_id": 1, "qty": 1 }
+  ]
+}
