@@ -38,13 +38,17 @@ def _smtp_send(to_email: str, subject: str, body: str) -> None:
         server.sendmail(from_email, [to_email], msg.as_string())
 
 def send_email(to_email: str, subject: str, body: str) -> None:
-    if settings.enable_email_notify != 1 or not to_email:
+    """寄給任意收件者（買家/老闆都可用）"""
+    if settings.enable_email_notify != 1:
+        return
+    if not to_email:
         return
     try:
         _smtp_send(to_email, subject, body)
-        logger.info("[email] sent to=%s subject=%s", to_email, subject)
     except Exception:
-        logger.exception("[email] send failed (ignored) to=%s subject=%s", to_email, subject)
+        # ⚠️ 重要：寄信失敗不能影響下單
+        logger.exception("[email] send failed (ignored)")
+        return
 
 def send_admin_email(subject: str, body: str) -> None:
     """寄給老闆（沿用你原本設計）"""

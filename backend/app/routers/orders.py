@@ -33,10 +33,9 @@ def create_order(
 ):
     # ====== A) 情境驗證 ======
     def _require(v: str | None, field: str) -> str:
-        s = _s(v)
-        if not s:
+        if not v:
             raise HTTPException(status_code=400, detail=f"{field} required")
-        return s
+        return _s(v)
 
     m = _require(payload.shipping_method, "shipping_method")  # "post" | "courier" | "cvs_711" | "cvs_family"
     is_post = m in ("post", "courier")
