@@ -115,4 +115,7 @@ def debug_admin_auth():
         "admin_token_len": len(t),
         "frontend_origin": getattr(settings, "frontend_origin", None),
         "cors_allow_origins": origins,
+        "database_url": settings.database_url,
+        "env_file": str(
+            (Path(__file__).resolve().parent.parent) / (".env.prod" if settings.env == "prod" else ".env.dev")),
     }
