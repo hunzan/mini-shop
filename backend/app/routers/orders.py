@@ -13,6 +13,17 @@ from datetime import datetime, timezone
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
+def _s(v: str | None) -> str:
+    return (v or "").strip()
+
+
+def _ship_label(m: str) -> str:
+    return {
+        "post": "郵寄",
+        "courier": "宅配",
+        "cvs_711": "超商取貨（7-11）",
+        "cvs_family": "超商取貨（全家）",
+    }.get(m, m)
 
 @router.post("", response_model=OrderCreated)
 def create_order(
@@ -21,41 +32,39 @@ def create_order(
     db: Session = Depends(get_db),
 ):
     # ====== A) 情境驗證 ======
-    def _require(v: str | None) -> str:
-        return (v or "").strip()
+    def _require(v: str | None, field: str) -> str:
+        s = _s(v)
+        if not s:
+            raise HTTPException(status_code=400, detail=f"{field} required")
+        return s
 
-    m = _require(payload.shipping_method)  # "post" | "courier" | "cvs_711" | "cvs_family"
+    m = _require(payload.shipping_method, "shipping_method")  # "post" | "courier" | "cvs_711" | "cvs_family"
     is_post = m in ("post", "courier")
     is_cvs = m in ("cvs_711", "cvs_family")
 
     # 共用必填
-    if not _require(payload.customer_name):
-        raise HTTPException(status_code=400, detail="customer_name required")
-    if not _require(payload.customer_email):
-        raise HTTPException(status_code=400, detail="customer_email required")
-    if not _require(payload.customer_phone):
-        raise HTTPException(status_code=400, detail="customer_phone required")
-    if not _require(payload.recipient_name):
-        raise HTTPException(status_code=400, detail="recipient_name required")
-    if not _require(payload.recipient_phone):
-        raise HTTPException(status_code=400, detail="recipient_phone required")
+    _require(payload.customer_name, "customer_name")
+    _require(payload.customer_email, "customer_email")
+    _require(payload.customer_phone, "customer_phone")
+    _require(payload.recipient_name, "recipient_name")
+    _require(payload.recipient_phone, "recipient_phone")
 
     if is_post:
-        post_addr = _require(payload.shipping_post_address) or _require(payload.shipping_address)
+        post_addr = _s(payload.shipping_post_address) or _s(payload.shipping_address)
         if not post_addr:
             raise HTTPException(status_code=400, detail="shipping_address required for post/courier")
+
+        payload.shipping_post_address = post_addr
 
     elif is_cvs:
         # cvs 必填：門市名稱（你前端是 cvs_store_name）
         store_name = _require(payload.cvs_store_name)
-        if not store_name:
-            raise HTTPException(status_code=400, detail="cvs_store_name required for cvs")
 
         # 可選：store_id
-        store_id = _require(payload.cvs_store_id)
+        store_id = _s(payload.cvs_store_id)
 
         # brand 可自動補
-        brand = _require(payload.cvs_brand) or ("7-11" if m == "cvs_711" else "全家")
+        brand = _s(getattr(payload, "cvs_brand", None)) or ("7-11" if m == "cvs_711" else "全家")
 
         # ✅ 把補齊的值寫回 payload（後面建單/寄信都一致）
         payload.cvs_brand = brand
@@ -63,7 +72,7 @@ def create_order(
         payload.cvs_store_id = store_id
 
         # ✅ shipping_address 你可以當「縣市區」備援（你前端有送）
-        if not _require(payload.shipping_address):
+        if not _s(payload.shipping_address):
             payload.shipping_address = store_name  # 沒送縣市區就用門市名稱頂一下
 
     else:
@@ -129,18 +138,12 @@ def create_order(
         total_amount=total,
     )
 
-    # ✅ 若 Order model 有這些欄位就寫入（沒有也不會炸）
-    if hasattr(order, "customer_phone"):
-        order.customer_phone = payload.customer_phone
+    order.customer_phone = payload.customer_phone
 
-    # ✅ CVS 欄位：只有在 cvs_711/cvs_family 才寫
     if payload.shipping_method in ("cvs_711", "cvs_family"):
-        if hasattr(order, "cvs_brand"):
-            order.cvs_brand = payload.cvs_brand
-        if hasattr(order, "cvs_store_name"):
-            order.cvs_store_name = payload.cvs_store_name
-        if hasattr(order, "cvs_store_id"):
-            order.cvs_store_id = payload.cvs_store_id
+        order.cvs_brand = payload.cvs_brand
+        order.cvs_store_name = payload.cvs_store_name
+        order.cvs_store_id = payload.cvs_store_id
 
     db.add(order)
     db.flush()  # 先拿到 order.id（不 commit）
@@ -175,17 +178,6 @@ def create_order(
 
     # ====== ✅ 買家確認信（下單成功即寄） ======
     buyer_subject = f"[A-kâu Shop] 已收到您的訂單 #{order.id}"
-
-    def _s(v: str | None) -> str:
-        return (v or "").strip()
-
-    def _ship_label(m: str) -> str:
-        return {
-            "post": "郵寄",
-            "courier": "宅配",
-            "cvs_711": "超商取貨（7-11）",
-            "cvs_family": "超商取貨（全家）",
-        }.get(m, m)
 
     buyer_lines: list[str] = []
     buyer_lines.append(f"{payload.customer_name} 您好：")
@@ -262,7 +254,7 @@ def create_order(
 
         lines.append(f"取貨人：{recipient}")
         lines.append(f"電話：{phone}")
-        lines.append(f"門市：{brand} {store_name}{f'（{store_id}）' if store_id else ''}")
+        lines.append(f"門市：{store_text}")
 
     else:
         lines.append(f"備援資訊：{order.shipping_address}")
@@ -276,33 +268,6 @@ def create_order(
     body = "\n".join(lines)
 
     background_tasks.add_task(send_admin_email, subject, body)
-
-    # ====== ✅ 買家確認信 ======
-    buyer_subject = f"[A-kâu Shop] 已收到您的訂單 #{order.id}"
-
-    buyer_lines: list[str] = []
-    buyer_lines.append(f"{payload.customer_name} 您好：")
-    buyer_lines.append("")
-    buyer_lines.append("我們已收到您的訂單，將盡快為您處理與出貨。")
-    buyer_lines.append("")
-    buyer_lines.append(f"訂單編號：{order.id}")
-    buyer_lines.append(f"訂單金額：{order.total_amount} 元")
-    buyer_lines.append("")
-    buyer_lines.append("【訂購內容】")
-    for p, qty in calc_items:
-        buyer_lines.append(f"- {p.name} × {qty}")
-
-    buyer_lines.append("")
-    buyer_lines.append("如需修改訂單或有任何問題，請直接回覆此信與我們聯繫。")
-
-    buyer_body = "\n".join(buyer_lines)
-
-    background_tasks.add_task(
-        send_email,
-        payload.customer_email,
-        buyer_subject,
-        buyer_body,
-    )
 
     return OrderCreated(order_id=order.id, total_amount=order.total_amount)
 
@@ -380,30 +345,30 @@ def mark_shipped(
     lines.append("")
 
     # 物流資訊（用 order 內已存欄位）
-    buyer_lines.append("【配送方式】")
-    buyer_lines.append(f"方式：{_ship_label(order.shipping_method)}")
+    lines.append("【配送方式】")
+    lines.append(f"方式：{_ship_label(o.shipping_method)}")
 
-    sm = _s(order.shipping_method)
+    sm = _s(o.shipping_method)
 
     if sm in ("post", "courier"):
-        addr = _s(order.shipping_post_address) or _s(order.shipping_address)
-        buyer_lines.append(f"地址：{addr}" if addr else "地址：（未提供）")
+        addr = _s(o.shipping_post_address) or _s(o.shipping_address)
+        lines.append(f"地址：{addr}" if addr else "地址：（未提供）")
 
     elif sm in ("cvs_711", "cvs_family"):
-        store_name = _s(order.cvs_store_name)
-        store_id = _s(order.cvs_store_id)
+        store_name = _s(o.cvs_store_name)
+        store_id = _s(o.cvs_store_id)
 
         if store_name or store_id:
             # 7-11 / 全家由 shipping_method 決定，不再需要 cvs_brand
-            buyer_lines.append(f"門市：{store_name}{f'（{store_id}）' if store_id else ''}".strip())
+            lines.append(f"門市：{store_name}{f'（{store_id}）' if store_id else ''}".strip())
         else:
-            buyer_lines.append("門市：（未提供）")
+            lines.append("門市：（未提供）")
 
     else:
         # 保底：避免未來新增 shipping_method 時信件空白
-        addr = _s(order.shipping_post_address) or _s(order.shipping_address)
+        addr = _s(o.shipping_post_address) or _s(o.shipping_address)
         if addr:
-            buyer_lines.append(f"地址：{addr}")
+            lines.append(f"地址：{addr}")
 
     if (payload.tracking_no or "").strip():
         lines.append(f"物流單號：{payload.tracking_no.strip()}")
