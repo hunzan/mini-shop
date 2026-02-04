@@ -1256,18 +1256,6 @@ h1.product-title{
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
 }
 
-/* 購物車 badge 也稍微立體一點 */
-.cart-badge {
-  margin-left: 6px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 0.85em;
-  font-weight: 800;
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.95);
-}
-
 /* ✅ 手機：按鈕更小，但仍左右排，避免擠到品牌 */
 @media (max-width: 480px) {
   .nav-actions {
@@ -1278,10 +1266,6 @@ h1.product-title{
     padding: 7px 10px;      /* 手機：小一點 */
     font-size: 0.92rem;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.10);
-  }
-
-  .cart-badge {
-    padding: 1px 6px;
   }
 }
 .btn {
