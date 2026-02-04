@@ -74,7 +74,8 @@ app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 # ✅ DB / seed
 Base.metadata.create_all(bind=engine)
 
-if getattr(settings, "seed_demo_data", 0) == 1:
+# ✅ 只允許在 dev + 明確開 seed 時才跑
+if settings.env == "dev" and settings.seed_demo_data == 1:
     with SessionLocal() as db:
         seed_products(db)
 
