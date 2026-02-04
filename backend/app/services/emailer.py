@@ -1,9 +1,33 @@
-import smtplib
+# backend/app/services/emailer.py
 import logging
+import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
 from ..config import settings
 
+logger = logging.getLogger(__name__)
+
+def _smtp_send(to_email: str, subject: str, body: str) -> None:
+    host = settings.smtp_host
+    port = settings.smtp_port
+    username = settings.smtp_username
+    password = settings.smtp_password
+    from_email = settings.smtp_from_email or username
+
+    if not host or not username or not password or not from_email:
+        logger.warning("[email] settings incomplete")
+        return
+
+    msg = MIMEText(body, "plain", "utf-8")
+    msg["Subject"] = str(Header(subject, "utf-8"))
+    msg["From"] = f"{settings.smtp_from_name} <{from_email}>"
+    msg["To"] = to_email
+
+    with smtplib.SMTP(host, port, timeout=15) as server:
+        server.ehlo()
+        server.starttls()
+        server.login(username, password)
+        server.sendmail(from_email, [to_email], msg.as_string())
 
 def send_email(to_email: str, subject: str, body: str) -> None:
     """寄給任意收件者（買家/老闆都可用）"""
@@ -13,19 +37,10 @@ def send_email(to_email: str, subject: str, body: str) -> None:
         return
     try:
         _smtp_send(to_email, subject, body)
-    except Exception as e:
-        # Railway / 雲端環境可能擋 SMTP；demo 先不要讓它影響下單
-        logger.exception("[email] send failed (ignored): %s", e)
+    except Exception:
+        # ⚠️ 重要：寄信失敗不能影響下單
+        logger.exception("[email] send failed (ignored)")
         return
-
-def send_email(to_email: str, subject: str, body: str) -> None:
-    """寄給任意收件者（買家/老闆都可用）"""
-    if settings.enable_email_notify != 1:
-        return
-    if not to_email:
-        return
-    _smtp_send(to_email, subject, body)
-
 
 def send_admin_email(subject: str, body: str) -> None:
     """寄給老闆（沿用你原本設計）"""
