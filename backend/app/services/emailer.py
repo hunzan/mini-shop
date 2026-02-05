@@ -3,9 +3,10 @@ import os
 import logging
 import httpx
 from ..config import settings
-logger.warning("[email] emailer path=%s", os.path.abspath(__file__))
 
 logger = logging.getLogger(__name__)
+
+logger.warning("[email] emailer path=%s", os.path.abspath(__file__))
 
 RESEND_ENDPOINT = "https://api.resend.com/emails"
 
@@ -50,6 +51,7 @@ def _api_send_resend(to_email: str, subject: str, body: str) -> None:
     except Exception:
         logger.info("[email] resend ok (non-json) to=%s", to_email)
 
+_printed_path = False
 
 def send_email(to_email: str, subject: str, body: str) -> None:
     # Railway variables 都是字串，這樣最耐操
