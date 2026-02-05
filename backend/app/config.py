@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     smtp_password: str | None = None
     smtp_from_name: str = "A-kâu Shop"
     smtp_from_email: str | None = None
+    
+    resend_api_key: str | None = None
 
     admin_token: str | None = None
     admin_password: str | None = None
