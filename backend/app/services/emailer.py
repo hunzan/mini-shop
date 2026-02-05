@@ -38,8 +38,11 @@ def _smtp_send(to_email: str, subject: str, body: str) -> None:
         server.sendmail(from_email, [to_email], msg.as_string())
 
 def send_email(to_email: str, subject: str, body: str) -> None:
+    logger.warning("[email] send_email called to=%s subject=%s enable=%s",
+                   to_email, subject, settings.enable_email_notify)
+
     """寄給任意收件者（買家/老闆都可用）"""
-    if settings.enable_email_notify != 1:
+    if int(getattr(settings, "enable_email_notify", 0) or 0) != 1:
         return
     if not to_email:
         return
