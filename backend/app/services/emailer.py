@@ -1,7 +1,9 @@
 # backend/app/services/emailer.py
+import os
 import logging
 import httpx
 from ..config import settings
+logger.warning("[email] emailer path=%s", os.path.abspath(__file__))
 
 logger = logging.getLogger(__name__)
 
