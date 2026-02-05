@@ -6,8 +6,6 @@ from ..config import settings
 
 logger = logging.getLogger(__name__)
 
-logger.warning("[email] emailer path=%s", os.path.abspath(__file__))
-
 RESEND_ENDPOINT = "https://api.resend.com/emails"
 
 
