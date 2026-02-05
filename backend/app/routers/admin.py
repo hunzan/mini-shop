@@ -6,6 +6,7 @@ from ..models.order import Order
 from ..models.order_item import OrderItem
 from ..models.product import Product
 from ..deps import require_admin_key
+from sqlalchemy import delete
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
 
@@ -85,3 +86,11 @@ def update_order_status(order_id: int, status: str, db: Session = Depends(get_db
     o.status = status
     db.commit()
     return {"ok": True, "order_id": order_id, "status": status}
+
+@router.delete("/orders/dev/reset", dependencies=[Depends(require_admin_key)])
+def dev_reset_orders(db: Session = Depends(get_db)):
+    # 先刪明細再刪主檔（避免 FK）
+    db.execute(delete(OrderItem))
+    db.execute(delete(Order))
+    db.commit()
+    return {"ok": True}
