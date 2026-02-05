@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     seed_demo_data: int = 0
     admin_token_ttl_seconds: int = 3600
 
+    allow_dev_reset: int = 0
+
     enable_email_notify: int = 0
     admin_notify_email: str | None = None
 

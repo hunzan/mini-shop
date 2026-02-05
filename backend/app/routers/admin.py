@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..db import get_db
-from ..deps import require_admin
+from ..deps import require_admin, require_admin_key
 from ..models.order import Order
 from ..models.order_item import OrderItem
 from ..models.product import Product
-from ..deps import require_admin_key
+from ..config import settings
 from sqlalchemy import delete
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
@@ -89,6 +89,8 @@ def update_order_status(order_id: int, status: str, db: Session = Depends(get_db
 
 @router.delete("/orders/dev/reset", dependencies=[Depends(require_admin_key)])
 def dev_reset_orders(db: Session = Depends(get_db)):
+    if settings.allow_dev_reset != 1:
+        raise HTTPException(status_code=404, detail="Not Found")
     # 先刪明細再刪主檔（避免 FK）
     db.execute(delete(OrderItem))
     db.execute(delete(Order))
