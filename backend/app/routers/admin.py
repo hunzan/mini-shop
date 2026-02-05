@@ -85,3 +85,20 @@ def update_order_status(order_id: int, status: str, db: Session = Depends(get_db
     o.status = status
     db.commit()
     return {"ok": True, "order_id": order_id, "status": status}
+
+@router.post("/dev/reset-orders", dependencies=[Depends(require_admin)])
+def admin_dev_reset_orders(db: Session = Depends(get_db)):
+    # 你現在要清的是 Railway production，所以我這邊「只允許 prod」
+    if settings.env != "prod":
+        raise HTTPException(status_code=403, detail="reset-orders only allowed in prod")
+
+    # 先刪明細再刪主檔（避免 FK 卡住）
+    deleted_items = db.query(OrderItem).delete()
+    deleted_orders = db.query(Order).delete()
+
+    db.commit()
+    return {
+        "ok": True,
+        "deleted_order_items": deleted_items,
+        "deleted_orders": deleted_orders,
+    }

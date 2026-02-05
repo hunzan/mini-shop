@@ -385,3 +385,14 @@ def mark_shipped(
     background_tasks.add_task(send_email, o.customer_email, subject, body)
 
     return {"ok": True, "order_id": o.id, "status": o.status}
+
+@router.post("/dev/reset", tags=["dev"])
+def dev_reset_orders(db: Session = Depends(get_db)):
+    if settings.env != "dev":
+        raise HTTPException(status_code=403, detail="forbidden")
+
+    # 先刪明細再刪主檔
+    db.query(OrderItem).delete()
+    db.query(Order).delete()
+    db.commit()
+    return {"ok": True}
